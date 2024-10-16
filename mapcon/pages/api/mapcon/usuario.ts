@@ -1,15 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import base from '../../../lib/back/base_query'
-import { getServerSession } from 'next-auth/next';
-// import { getSession } from 'next-auth/react';
+import { LogRequest } from './_helper';
+import { getSession } from 'next-auth/react';
 var bcrypt = require('bcryptjs');
 
-
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-    // const session = await getSession({ req });
-    const session = await getServerSession(req , res, {});
-    console.debug('session ts api', session);
+    const session = await getSession({ req });
     if (session) {
+        LogRequest(__filename, req, session);
         if (req.method == 'GET' && req.query.id) {
             res.status(200).json(await base.getModel('usuario', { 'num_seq_usuario': req.query.id }))
         } else if (req.method == 'GET') {

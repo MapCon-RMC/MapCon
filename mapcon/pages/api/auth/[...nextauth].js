@@ -35,7 +35,7 @@ export default NextAuth({
                             id: usr.usu_login,
                             perfil: usr.perfil_usuario_num_seq_perfil_usuario,
                         };
-                        console.debug('Authorize : ', ret);
+                        console.debug('Logging user in: ', ret.id, ", ", ret.perfil);
                         return ret;
                 } else {
                     return null;
@@ -58,14 +58,14 @@ export default NextAuth({
             return token;
         },
         session: async (session) => {
-            console.debug('Session TOKEN USER : ', session.token.user);
             if (session) {
-              session.user = session.token.user;
-              return session;
+                console.debug('Session TOKEN USER : ', session.token.user);
+                session.user = session.token.user;
+                return session;
             } else {
-              // Handle the case where session or user is undefined
-              console.error('Session or user is undefined', { session });
-              return session;
+                // Handle the case where session or user is undefined
+                console.error('Session or user is undefined', { session });
+                return session;
             }
         }
         // session: async (session, user, sessionToken) => {
