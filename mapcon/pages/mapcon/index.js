@@ -17,7 +17,6 @@ function Index(props) {
 
 export async function getServerSideProps(context){
   const session = await getSession({req: context.req})
-  console.debug('session', session);
   if(!session){
     return {
       redirect: {

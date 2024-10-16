@@ -43,9 +43,6 @@ export default NextAuth({
             }
         })
     ],
-    // jwt: {
-    //     secret: process.env.JWT_SIGNING_PRIVATE_KEY,
-    //   },
     callbacks: {
         jwt: async ({token, user, account, profile}) => {
             //  "user" parameter is the object received from "authorize"
@@ -59,7 +56,6 @@ export default NextAuth({
         },
         session: async (session) => {
             if (session) {
-                console.debug('Session TOKEN USER : ', session.token.user);
                 session.user = session.token.user;
                 return session;
             } else {
@@ -68,18 +64,8 @@ export default NextAuth({
                 return session;
             }
         }
-        // session: async (session, user, sessionToken) => {
-        //     //  "session" is current session object
-        //     //  below we set "user" param of "session" to value received from "jwt" callback
-        //     console.debug('Session : ', session, user, sessionToken);
-        //     session.user = user.user;
-        //     return Promise.resolve(session)
-        // }
     },
     pages: {
         signIn: '/login'
     }
-
-    // A database is optional, but required to persist accounts in a database
-    //database: process.env.DATABASE_URL,
 })
