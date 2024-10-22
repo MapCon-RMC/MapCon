@@ -1,14 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getSession } from 'next-auth/react';
+import { getServerSession } from "next-auth"
 import db from "../../../lib/back/db";
 import { v1 as uuidv1 } from "uuid";
 import { exec } from "child_process";
 import { LogRequest } from './_helper';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-  const session = await getSession({ req });
+  const session = await getServerSession(req, res, { /* options */ });
   if (session) {
-    LogRequest(__filename, req, session);
+    LogRequest(__filename, req, req.body);
     if (!req.body.is_protesto) {
       await db("crawling.crawling_news")
         .where({ url: req.body.url })
@@ -37,7 +37,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
       if (typeof req.body.existente == "number") {
         // Vincula com um protesto já existente
-
         // Adicionar fonte
         await db("fonte").insert({
           fonte_protesto_num_seq_fonte_protesto: 22,
@@ -80,5 +79,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     }
     
     res.status(200).json({ ok: "Migrou" });
+  } else {
+    res.status(401).json({ error: "Não autorizado" });
   }
 };

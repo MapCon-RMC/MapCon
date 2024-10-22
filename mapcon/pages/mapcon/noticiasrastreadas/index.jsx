@@ -231,9 +231,15 @@ function MigraNoticiaForm({ showForm, closeForm }) {
     setSending(true);
     dados.url = url;
     dados.data = moment(dados.data).format("yyyy-MM-DD");
-
+    const session = await getSession();
     await axios
-      .post(`/api/mapcon/migra`, dados)
+      .post(`/api/mapcon/migra`, {
+        ...dados,
+        user: {
+          id: session.user.id,
+          perfil: session.user.perfil
+        }
+      })
       .then(() => setSending(false))
       .catch(() => setSending(false));
     closeForm(true);
