@@ -104,8 +104,11 @@ export default function ToolbarMapCon() {
     }
   ];
 
-  const start = <Link href="/mapcon"><img alt="logo" src="/images/logo.png" height="40" className="p-mr-2"></img></Link>;
-  // const start = <Link href="/">MapCon</Link>;
+  const start = (
+    <Link href="/mapcon">
+      <img alt="logo" src="/images/logo.png" height="40" className="p-mr-2"/>
+    </Link>
+  );
 
   const right_toolbar = (
     <div>
@@ -117,13 +120,9 @@ export default function ToolbarMapCon() {
     </div>
   )
 
-
   return (
     <div>
-      <div>
-        {/* se eu quiser pegar os dados da autenticação... {session && session.user.name} */}
-        <Menubar start={start} model={items} end={right_toolbar} />
-      </div>
+      <Menubar start={start} model={items} end={right_toolbar} />
     </div>
   );
 
