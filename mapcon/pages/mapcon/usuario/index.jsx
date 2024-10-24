@@ -44,7 +44,14 @@ export default function UsuarioPage(props) {
     }
 
     async function editButtonClicked(row) {
-        const r = await axios.get('/api/mapcon/usuario', { params: { id: row[0].num_seq_usuario } })
+        const session = await getSession();
+        const r = await axios.get('/api/mapcon/usuario', { 
+            params: { id: row[0].num_seq_usuario },
+            user: {
+                id: session.user.id,
+                perfil: session.user.perfil
+            }
+        })
         
         setshowForm({
             visible: true,
@@ -153,11 +160,14 @@ function UsuarioSenhaForm(props) {
     const onSubmit = async data => {
         console.debug('ATUALIZANDO SENHA', data)
         delete data['usu_senha_repetir']
-
-        const r = await axios.put('/api/mapcon/usuario',
-            {
+        const session = await getSession();
+        await axios.put('/api/mapcon/usuario', {
                 ...data,
-                num_seq_usuario: props.showForm.num,
+                user: {
+                    id: session.user.id,
+                    perfil: session.user.perfil
+                },
+                num_seq_usuario: props.showForm.num
             })
 
         props.closeForm(true)
@@ -202,12 +212,26 @@ function UsuarioForm(props) {
     const onSubmit = async data => {
         console.debug('DATA: ', data);
         console.debug('PROPS DATA: ', props);
+        const session = await getSession();
         if(props.showForm.data) {
-            const r = await axios.put('/api/mapcon/usuario',{num_seq_usuario: props.showForm.data.num_seq_usuario,...data})
+            await axios.put('/api/mapcon/usuario',{
+                num_seq_usuario: props.showForm.data.num_seq_usuario,
+                user: {
+                    id: session.user.id,
+                    perfil: session.user.perfil
+                },
+                ...data
+            })
         } else {
             console.debug('SESSION ON SUBMIT', await getSession());
             delete data['usu_senha_repetir']
-            const r = await axios.post('/api/mapcon/usuario',data)
+            await axios.post('/api/mapcon/usuario',{
+                ...data,
+                user: {
+                    id: session.user.id,
+                    perfil: session.user.perfil
+                }
+            })
         }
         props.closeForm(true)
     }

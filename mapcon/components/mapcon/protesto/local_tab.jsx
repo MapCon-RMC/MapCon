@@ -4,11 +4,10 @@ import { confirmDialog, ConfirmDialog } from 'primereact/confirmdialog';
 import { DataTable } from "primereact/datatable";
 import { InputTextarea } from 'primereact/inputtextarea';
 import { Dropdown } from "primereact/dropdown";
-import React from "react";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
-import { useEffect } from "react";
+import { getSession } from 'next-auth/react'
 
 export function LocalTab({ protestId, options, selected }, props) {
 
@@ -29,14 +28,17 @@ export function LocalTab({ protestId, options, selected }, props) {
 
     useEffect(() => {
         const watchCidadeFunc = async () => {
-                if (watchCidade) {
-                const r = await (await axios.get('/api/mapcon/bairro',
-                    {
-                        params: {
-                            'limit': '-1',
-                            'filters': JSON.stringify([{type: 'equal', field: 'cidade_num_seq_cidade', value: watchCidade }])
-                        }
-                    })).data
+            const session = await getSession();
+            if (watchCidade) {
+                const r = await (await axios.get('/api/mapcon/bairro', { params: {
+                    'limit': '-1',
+                    'filters': JSON.stringify([{type: 'equal', field: 'cidade_num_seq_cidade', value: watchCidade }]),
+                    user: {
+                        id: session.user.id,
+                        perfil: session.user.perfil
+                    }
+                
+                } })).data
 
                 setbairros(r.data)    
             }
@@ -58,8 +60,14 @@ export function LocalTab({ protestId, options, selected }, props) {
         const nameCidade = options.filter(option => option.id == e.cidade_num_seq_cidade)[0].name;
         const nameBairro = bairros.filter(bairro => bairro.num_seq_bairro == e.bairro_num_seq_bairro)[0].bairro;
 
- 
-        const ret = await axios.post(`/api/mapcon/local`, e);
+        const session = await getSession();
+        const ret = await axios.post(`/api/mapcon/local`, {
+            ...e,
+            user: {
+                id: session.user.id,
+                perfil: session.user.perfil
+            }
+        });
         reset();
         selectedValue.push({ 'id': ret.data[0].num_seq_local, 'name': e.endereco, 'cidade': nameCidade, 'bairro': nameBairro  })
         setselectedValue(selectedValue)

@@ -42,7 +42,14 @@ export default function formaparticipacaoPage(props) {
     }
 
     async function editButtonClicked(row) {
-        const r = await axios.get('/api/mapcon/formaparticipacao', { params: { id: row[0].num_seq_forma_participacao } })
+        const session = await getSession();
+        const r = await axios.get('/api/mapcon/formaparticipacao', { params: { 
+            id: row[0].num_seq_forma_participacao,
+            user: {
+                id: session.user.id,
+                perfil: session.user.perfil
+            }
+        } })
         
         setshowForm({
             visible: true,
@@ -134,11 +141,24 @@ function FormaParticipacaoForm(props) {
     const { control, handleSubmit, formState: { errors } } = useForm({ defaultValues: props.showForm.data });
 
     const onSubmit = async data => {
-
+        const session = await getSession();
         if(props.showForm.data){ // Editar
-            const r = await axios.put('/api/mapcon/formaparticipacao',{num_seq_forma_participacao: props.showForm.data.num_seq_forma_participacao,...data})
+            await axios.put('/api/mapcon/formaparticipacao',{
+                num_seq_forma_participacao: props.showForm.data.num_seq_forma_participacao,
+                ...data,
+                user: {
+                    id: session.user.id,
+                    perfil: session.user.perfil
+                }
+            })
         }else{
-            const r = await axios.post('/api/mapcon/formaparticipacao',data)
+            await axios.post('/api/mapcon/formaparticipacao', {
+                ...data,
+                user: {
+                    id: session.user.id,
+                    perfil: session.user.perfil
+                }
+            })
         }
         
 

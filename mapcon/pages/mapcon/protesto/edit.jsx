@@ -8,6 +8,7 @@ import { useForm, Controller } from "react-hook-form";
 import axios from 'axios';
 import db from '../../../lib/back/db'
 import { useRouter } from 'next/router';
+import { getSession } from 'next-auth/react'
 import moment from 'moment';
 import { Panel } from 'primereact/panel';
 import { Timeline } from 'primereact/timeline';
@@ -62,13 +63,19 @@ export default function ProtestoForm(props) {
 
     ]
 
-    const onSubmit = data => {
+    const onSubmit = async data => {
         data['data_protesto'] = moment(data['data_protesto'], 'DD/MM/YYYY').format('YYYY-MM-DD')
 
         if (props.id) {
             data['num_seq_protesto'] = props.id
-
-            axios.put('/api/mapcon/protesto', data).then(r => {
+            const session = await getSession();
+            axios.put('/api/mapcon/protesto', {
+                ...data,
+                user: {
+                    id: session.user.id,
+                    perfil: session.user.perfil
+                }
+            }).then(r => {
                 toast.current.show({ severity: 'success', summary: 'Dados Atualizados', detail: 'Os dados foram atualizados com sucesso.', life: 3000 });
             })
         }

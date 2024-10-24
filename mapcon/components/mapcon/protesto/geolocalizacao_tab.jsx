@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DivOverlay, geoJSON, latLng, LayerGroup } from 'leaflet';
 import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMapEvent, useMapEvents, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css';
-import { useState } from 'react';
 import { icon } from "leaflet"
 import { useForm, Controller, reset, get } from 'react-hook-form';
 import { Dialog } from 'primereact/dialog';
@@ -10,6 +9,7 @@ import { Button } from 'primereact/button'
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext'
 import axios from 'axios';
+import { getSession } from 'next-auth/react'
 
 const ICON = icon({
     iconUrl: "/marker.png",
@@ -26,7 +26,14 @@ export default function GeolocalizacaohMap({ protestId }) {
     const [coordenadas, setCoordenadas] = useState(null)
 
     const getCoords = async () => {
-        const r = await axios.get('/api/mapcon/geolocalizacao', { params: { protesto_num_seq_protesto: protestId } })
+        const session = await getSession();
+        const r = await axios.get('/api/mapcon/geolocalizacao', { params: { 
+            protesto_num_seq_protesto: protestId,
+            user: {
+                id: session.user.id,
+                perfil: session.user.perfil
+            }
+        } })
         r.data ? setCoordenadas({latitude:r.data.latitude , longitude: r.data.longitude}) : null
     }
     useEffect(() => {
@@ -124,7 +131,14 @@ function GeolocalizacaoForm({ showForm, closeForm }) {
 
     const onSubmit = async data => {
         data['protesto_num_seq_protesto'] = showForm.data.protesto_num_seq_protesto
-        const r = await axios.post('/api/mapcon/geolocalizacao',data)
+        const session = await getSession();
+        await axios.post('/api/mapcon/geolocalizacao',{
+            ...data,
+            user: {
+                id: session.user.id,
+                perfil: session.user.perfil
+            }
+        })
 
         showForm.marker_pos(showForm.pos)
         closeForm(true)

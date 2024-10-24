@@ -38,14 +38,31 @@ export default function AgenteProtestoPage(props) {
 
 
     async function addButtonClicked(e) {
-        const r2 = await axios.get('/api/mapcon/catagente?limit=-1')
+        const r = await axios.get('/api/mapcon/catagente?limit=-1', { params: {
+            user: {
+                id: session.user.id,
+                perfil: session.user.perfil
+            }
+        }})
 
-        setshowForm({ visible: true, categoria_agentes: r2.data['data'] })
+        setshowForm({ visible: true, categoria_agentes: r.data['data'] })
     }
 
     async function editButtonClicked(row) {
-        const r = await axios.get('/api/mapcon/agente_protesto', { params: { id: row[0].num_seq_agente_protesto } })
-        const r2 = await axios.get('/api/mapcon/catagente?limit=-1')
+        const session = await getSession();
+        const r = await axios.get('/api/mapcon/agente_protesto', { params: {
+            id: row[0].num_seq_agente_protesto,
+            user: {
+                id: session.user.id,
+                perfil: session.user.perfil
+            }
+        } })
+        const r2 = await axios.get('/api/mapcon/catagente?limit=-1', { params: {
+            user: {
+                id: session.user.id,
+                perfil: session.user.perfil
+            }
+        }})
         
         setshowForm({
             //visible: true,
@@ -136,11 +153,24 @@ function AgenteForm(props) {
     const { control, handleSubmit, formState: { errors } } = useForm({ defaultValues: props.showForm.data });
 
     const onSubmit = async data => {
-
-        if(props.showForm.data){ // Editar
-            const r = await axios.put('/api/mapcon/agente_protesto',{num_seq_agente_protesto: props.showForm.data.num_seq_agente_protesto,...data})
-        }else{
-            const r = await axios.post('/api/mapcon/agente_protesto',data)
+        const session = await getSession();
+        if(props.showForm.data) { // Editar
+            await axios.put('/api/mapcon/agente_protesto', {
+                num_seq_agente_protesto: props.showForm.data.num_seq_agente_protesto,
+                ...data,
+                user: {
+                    id: session.user.id,
+                    perfil: session.user.perfil
+                }
+            })
+        } else {
+            await axios.post('/api/mapcon/agente_protesto', {
+                ...data,
+                user: {
+                    id: session.user.id,
+                    perfil: session.user.perfil
+                }
+            })
         }
         
 

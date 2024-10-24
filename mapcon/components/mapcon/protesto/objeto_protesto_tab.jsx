@@ -5,10 +5,10 @@ import { DataTable } from "primereact/datatable";
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { Dropdown } from "primereact/dropdown";
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
+import { getSession } from 'next-auth/react'
 
 export function ObjetoProtestoTab({ protestId, options, selected }, props) {
 
@@ -28,8 +28,14 @@ export function ObjetoProtestoTab({ protestId, options, selected }, props) {
         e['protesto_num_seq_protesto'] = protestId
 
         const nameCategory = options.filter(option => option.id == e.categoria_objeto_num_seq_categoria_objeto)[0].name;
-
-        const ret = await axios.post(`/api/mapcon/objeto_protesto`, e)
+        const session = await getSession();
+        const ret = await axios.post(`/api/mapcon/objeto_protesto`, {
+            ...e,
+            user: {
+                id: session.user.id,
+                perfil: session.user.perfil
+            }
+        })
         reset();
         selectedValue.push({ 'id': ret.data[0].num_seq_objeto_protesto, 'name': ret.data[0].objeto_protesto, 'categoria': nameCategory })
         setselectedValue(selectedValue)

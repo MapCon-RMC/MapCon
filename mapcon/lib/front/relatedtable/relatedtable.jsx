@@ -2,9 +2,8 @@ import { Column } from "primereact/column";
 import { Button } from "primereact/button"
 import { DataTable } from "primereact/datatable";
 import { Dropdown } from "primereact/dropdown";
-import React from "react";
-
-import { useState } from "react";
+import React, { useState } from "react";
+import { getSession } from 'next-auth/react'
 
 export default function RelatedTable({ protestId, options, selected, table, fields, children }) {
 
@@ -18,8 +17,14 @@ export default function RelatedTable({ protestId, options, selected, table, fiel
         setcomboOptions(comboOptions.filter(v => v.id != e.value.id))
         setselectedValue(selected.push(e.value))
         // TODO: inserir na tabela table e depois inserir na datatable
-
-        await axios.post(`/api/mapcon/${table}`,data)
+        const session = await getSession();
+        await axios.post(`/api/mapcon/${table}`, {
+            ...data,
+            user: {
+                id: session.user.id,
+                perfil: session.user.perfil
+            }
+        })
 
     }
 

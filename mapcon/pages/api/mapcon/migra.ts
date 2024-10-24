@@ -8,7 +8,7 @@ import { LogRequest } from './_helper';
 export default async (req: NextApiRequest, res: NextApiResponse) => {
     const session = await getServerSession(req, res, { /* options */ });
     if (session) {
-        LogRequest(__filename, req, req.body);
+        LogRequest(__filename, req);
         if (req.body.is_protesto) {
         // Marca como protesto
         await db("crawling.crawling_news")

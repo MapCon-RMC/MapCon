@@ -1,4 +1,5 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import { getSession } from 'next-auth/react';
 import { DataTable } from 'primereact/datatable';
 import { Button } from 'primereact/button';
 import { SplitButton } from 'primereact/splitbutton';
@@ -8,7 +9,7 @@ import { InputText } from 'primereact/inputtext';
 // import { useApolloClient, gql } from '@apollo/client';
 import { Paginator } from 'primereact/paginator';
 import axios from 'axios';
-import styles from './datatable.module.css'
+import styles from './datatable.module.css';
 import { set } from 'react-hook-form';
 
 
@@ -57,7 +58,6 @@ const TableCrud = forwardRef((props, ref) => {
             result => {
                 setRows(result['data']['data'])
                 setTotal(result['data']['total'])
-                // console.debug('result: ', result['data']['data'], ' total: ', result['data']['total']);
             },
             error => {
                 console.debug('error: ', error);
@@ -68,13 +68,18 @@ const TableCrud = forwardRef((props, ref) => {
     async function searchDataTable(sField, sOrder, p = null, rows = null) {
         setloading(true)
         try {
+            const session = await getSession();
             const ret = await axios.get(props.url, {
                 params: {
                     filters: JSON.stringify([{ "type": typeFilter, "field": field, "value": value }]),
                     // order: { "order": sOrder ? sOrder : sortOrder, "field": sField ? sField : sortField },
                     order: JSON.stringify({ "order": sOrder ? sOrder : sortOrder, "field": sField ? sField : sortField }),
                     limit: rows != null ? rows : rowsPerPage,
-                    page: p != null ? p : page
+                    page: p != null ? p : page,
+                    user: {
+                        id: session.user.id,
+                        perfil: session.user.perfil
+                    }
                 }
             })
             return ret;

@@ -7,7 +7,7 @@ import { useRouter } from 'next/router';
 import moment from 'moment';
 import { InputMask } from 'primereact/inputmask';
 import ToolbarSite from '../../../components/toolbar_site';
-
+import { getSession } from 'next-auth/react'
 
 
 
@@ -21,12 +21,17 @@ export default function ProtestoForm(props) {
 
 
 
-    const onSubmit = data => {
-
-
+    const onSubmit = async data => {
         data['data_protesto'] = moment(data['data_protesto'], 'DD/MM/YYYY').format('YYYY-MM-DD')
 
-        axios.post('/api/mapcon/protesto', data).then(r => router.push({
+        const session = await getSession();
+        axios.post('/api/mapcon/protesto', {
+            ...data,
+            user: {
+                id: session.user.id,
+                perfil: session.user.perfil
+            }
+        }).then(r => router.push({
             pathname: '/mapcon/protesto/edit',
             query: { id: r.data[0]['num_seq_protesto'] },
         }))

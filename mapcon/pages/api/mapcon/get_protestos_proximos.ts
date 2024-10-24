@@ -6,7 +6,7 @@ import { LogRequest } from './_helper';
 export default async (req: NextApiRequest, res: NextApiResponse) => {
     const session = await getServerSession(req, res, { /* options */ });
     if (session) {
-        LogRequest(__filename, req, req.body);
+        LogRequest(__filename, req);
         if (req.method == 'GET' && req.query.data) {
             const query = await db.raw("SELECT num_seq_protesto,to_char(data_protesto,'DD/MM/YYYY') as data_protesto, tema_protesto FROM protesto ORDER BY ABS(data_protesto::date - TO_DATE(?,'YYYY-MM-DD')) LIMIT 10;", [req.query.data]);
             res.status(200).json(query.rows)

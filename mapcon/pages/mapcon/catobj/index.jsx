@@ -43,7 +43,14 @@ export default function CatObjPage(props) {
     }
 
     async function editButtonClicked(row) {
-        const r = await axios.get('/api/mapcon/catobj', { params: { id: row[0].num_seq_categoria_objeto } })
+        const session = await getSession();
+        const r = await axios.get('/api/mapcon/catobj', { params: { 
+            id: row[0].num_seq_categoria_objeto,
+            user: {
+                id: session.user.id,
+                perfil: session.user.perfil
+            }
+        } })
         
         setshowForm({
             visible: true,
@@ -132,10 +139,24 @@ function CategoriaObjetoForm(props) {
     const { control, handleSubmit, formState: { errors } } = useForm({ defaultValues: props.showForm.data });
 
     const onSubmit = async data => {
+        const session = await getSession();
         if(props.showForm.data){ // Editar
-            const r = await axios.put('/api/mapcon/catobj', {num_seq_categoria_objeto: props.showForm.data.num_seq_categoria_objeto,...data})
+             await axios.put('/api/mapcon/catobj', {
+                num_seq_categoria_objeto: props.showForm.data.num_seq_categoria_objeto,
+                ...data,
+                user: {
+                    id: session.user.id,
+                    perfil: session.user.perfil
+                }
+            })
         }else{
-            const r = await axios.post('/api/mapcon/catobj', data)
+             await axios.post('/api/mapcon/catobj', {
+                ...data,
+                user: {
+                    id: session.user.id,
+                    perfil: session.user.perfil
+                }
+            })
         }
         
         props.closeForm(true)

@@ -38,14 +38,32 @@ export default function BairroPage(props) {
 
 
     async function addButtonClicked(e) {
-        const r2 = await axios.get('/api/mapcon/cidade?limit=-1')
+        const session = await getSession();
+        const r = await axios.get('/api/mapcon/cidade?limit=-1', { params: {
+            user: {
+                id: session.user.id,
+                perfil: session.user.perfil
+            }
+        }})
 
-        setshowForm({ visible: true, cidades: r2.data['data'] })
+        setshowForm({ visible: true, cidades: r.data['data'] })
     }
 
     async function editButtonClicked(row) {
-        const r = await axios.get('/api/mapcon/bairro', { params: { id: row[0].num_seq_bairro } })
-        const r2 = await axios.get('/api/mapcon/cidade?limit=-1')
+        const session = await getSession();
+        const r = await axios.get('/api/mapcon/bairro', { params: { 
+            id: row[0].num_seq_bairro,
+            user: {
+                id: session.user.id,
+                perfil: session.user.perfil
+            }
+        } })
+        const r2 = await axios.get('/api/mapcon/cidade?limit=-1', { params: {
+            user: {
+                id: session.user.id,
+                perfil: session.user.perfil
+            }
+        }})
 
         setshowForm({
             //visible: true,
@@ -137,10 +155,24 @@ function BairroForm(props) {
     const { control, handleSubmit, formState: { errors } } = useForm({ defaultValues: props.showForm.data });
 
     const onSubmit = async data => {
+        const session = await getSession();
         if (props.showForm.data) { // Editar
-            const r = await axios.put('/api/mapcon/bairro', { num_seq_bairro: props.showForm.data.num_seq_bairro, ...data })
+            await axios.put('/api/mapcon/bairro', {
+                num_seq_bairro: props.showForm.data.num_seq_bairro,
+                ...data,
+                user: {
+                    id: session.user.id,
+                    perfil: session.user.perfil
+                }
+            })
         } else {
-            const r = await axios.post('/api/mapcon/bairro', data)
+            await axios.post('/api/mapcon/bairro', {
+                ...data,
+                user: {
+                    id: session.user.id,
+                    perfil: session.user.perfil
+                }
+            })
         }
 
         props.closeForm(true)

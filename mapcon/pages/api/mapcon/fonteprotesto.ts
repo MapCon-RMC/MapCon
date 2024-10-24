@@ -6,7 +6,7 @@ import { LogRequest } from './_helper';
 export default async (req: NextApiRequest, res: NextApiResponse) => {
     const session = await getServerSession(req, res, { /* options */ });
     if (session) {
-        LogRequest(__filename, req, req.body);
+        LogRequest(__filename, req);
         if (req.method == 'GET' && req.query.id) {
             res.status(200).json(await base.getModel('fonte_protesto', { 'num_seq_fonte_protesto': req.query.id }))
         } else if (req.method == 'GET') {

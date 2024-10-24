@@ -2,13 +2,11 @@ import { Column } from "primereact/column";
 import { Button } from "primereact/button"
 import { confirmDialog, ConfirmDialog } from 'primereact/confirmdialog';
 import { DataTable } from "primereact/datatable";
-import { InputTextarea } from 'primereact/inputtextarea';
 import { Dropdown } from "primereact/dropdown";
-import React from "react";
-import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
-import { useEffect } from "react";
+import React, { useState } from "react";
+import { getSession } from 'next-auth/react'
 
 export function AgenteTab({ protestId, opt_col,opt_forma, selected }, props) {
 
@@ -37,8 +35,14 @@ export function AgenteTab({ protestId, opt_col,opt_forma, selected }, props) {
         const nameForma = opt_forma.filter(option => option.id == e.forma_participacao_num_seq_forma_participacao)[0].name;
 
      
- 
-        const ret = await axios.post(`/api/mapcon/participacao_agente`, e)
+        const session = await getSession();
+        const ret = await axios.post(`/api/mapcon/participacao_agente`, {
+            e,
+            user: {
+                id: session.user.id,
+                perfil: session.user.perfil
+            }
+        })
         reset();
         selectedValue.push({ 'id': ret.data[0].num_seq_participacao_agente, 'name': nameColetivo, 'forma': nameForma  })
         // setselectedValue(selectedValue)

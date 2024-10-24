@@ -4,10 +4,10 @@ import { confirmDialog, ConfirmDialog } from 'primereact/confirmdialog';
 import { DataTable } from "primereact/datatable";
 import { InputTextarea } from 'primereact/inputtextarea';
 import { Dropdown } from "primereact/dropdown";
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
+import { getSession } from 'next-auth/react'
 
 export function FonteTab({ protestId, options, selected }, props) {
 
@@ -27,7 +27,14 @@ export function FonteTab({ protestId, options, selected }, props) {
 
         const nameCategory = options.filter(option => option.id == e.fonte_protesto_num_seq_fonte_protesto)[0].name;
 
-        const ret = await axios.post(`/api/mapcon/fonte`, e)
+        const session = await getSession();
+        const ret = await axios.post(`/api/mapcon/fonte`, {
+            ...e,
+            user: {
+                id: session.user.id,
+                perfil: session.user.perfil
+            }
+        })
         reset();
         selectedValue.push({ 'id': ret.data[0].num_seq_fonte, 'name': nameCategory, 'referencia': ret.data[0].referencia })
         setselectedValue(selectedValue)
