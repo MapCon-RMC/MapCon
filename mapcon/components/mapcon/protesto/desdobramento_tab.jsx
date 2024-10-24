@@ -42,8 +42,15 @@ export function DesdobramentoTab({ protestId, selected }, props) {
             icon: 'pi pi-exclamation-triangle',
             acceptLabel: 'Sim',
             rejectLabel: 'Não',
-            accept: async () => {         
-                await axios.delete('/api/mapcon/desdobramento', { data: { 'num_seq_desdobramento': e.id } })
+            accept: async () => {
+                const session = await getSession();
+                await axios.delete('/api/mapcon/desdobramento', { 
+                    data: { 'num_seq_desdobramento': e.id },
+                    user: {
+                        id: session.user.id,
+                        perfil: session.user.perfil
+                    }
+                })
                 const newSelectedValues = selectedValue.filter(v => v.id != e.id)
                 setselectedValue(newSelectedValues)
             },

@@ -63,9 +63,16 @@ export default function CatAgentePage(props) {
         });
     }
 
-    async function removeRows(e){
+    async function removeRows(e) {
+        const session = await getSession();
         for (const item of e) {
-            await axios.delete('/api/mapcon/catagente', { data: { num_seq_categoria_agente: item.num_seq_categoria_agente } })
+            await axios.delete('/api/mapcon/catagente', {
+                data: { num_seq_categoria_agente: item.num_seq_categoria_agente },
+                user: {
+                    id: session.user.id,
+                    perfil: session.user.perfil
+                }
+            })
         }
 
         childRef.current.updateDatatable()

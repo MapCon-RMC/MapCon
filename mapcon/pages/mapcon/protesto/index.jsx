@@ -65,9 +65,16 @@ export default function ProtestoPage(props) {
         });
     }
 
-    async function removeRows(e){
+    async function removeRows(e) {
+        const session = await getSession();
         for (const item of e) {
-            await axios.delete('/api/mapcon/protesto', { data: { num_seq_protesto: item.num_seq_protesto } })
+            await axios.delete('/api/mapcon/protesto', { 
+                data: { num_seq_protesto: item.num_seq_protesto },
+                user: {
+                    id: session.user.id,
+                    perfil: session.user.perfil
+                }
+            })
         }
 
         childRef.current.updateDatatable()

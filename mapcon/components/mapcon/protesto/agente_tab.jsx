@@ -53,8 +53,14 @@ export function AgenteTab({ protestId, opt_col,opt_forma, selected }, props) {
             acceptLabel: 'Sim',
             rejectLabel: 'Não',
             accept: async () => {
-
-                await axios.delete('/api/mapcon/participacao_agente', { data: { 'num_seq_participacao_agente': e.id } })
+                const session = await getSession();
+                await axios.delete('/api/mapcon/participacao_agente', { 
+                    data: { 'num_seq_participacao_agente': e.id },
+                    user: {
+                        id: session.user.id,
+                        perfil: session.user.perfil
+                    }
+                })
                 const newSelectedValues = selectedValue.filter(v => v.id != e.id)
                 setselectedValue(newSelectedValues)
             },

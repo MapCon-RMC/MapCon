@@ -54,9 +54,14 @@ export default function NoticiasRastreadasPage(props) {
   }
 
   async function removeRows(e) {
+    const session = await getSession();
     for (const item of e) {
       await axios.delete("/api/mapcon/crawling_news", {
         data: { url: item.url },
+        user: {
+          id: session.user.id,
+          perfil: session.user.perfil
+        }
       });
     }
 
@@ -246,8 +251,13 @@ function MigraNoticiaForm({ showForm, closeForm }) {
   };
 
   async function removeEl(url) {
+    const session = await getSession();
     await axios.delete("/api/mapcon/crawling_news", {
       data: { url: url },
+      user: {
+          id: session.user.id,
+          perfil: session.user.perfil
+      }
     });
 
     closeForm(true);

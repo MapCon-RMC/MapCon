@@ -64,9 +64,16 @@ export default function CatObjPage(props) {
         });
     }
 
-    async function removeRows(e){
+    async function removeRows(e) {
+        const session = await getSession();
         for (const item of e) {
-            await axios.delete('/api/mapcon/catobj', { data: { num_seq_categoria_objeto: item.num_seq_categoria_objeto } })
+            await axios.delete('/api/mapcon/catobj', { 
+                data: { num_seq_categoria_objeto: item.num_seq_categoria_objeto },
+                user: {
+                    id: session.user.id,
+                    perfil: session.user.perfil
+                }
+            })
         }
 
         childRef.current.updateDatatable()

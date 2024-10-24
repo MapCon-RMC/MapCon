@@ -67,9 +67,16 @@ export default function CidadePage(props) {
         });
     }
 
-    async function removeRows(e){
+    async function removeRows(e) {
+        const session = await getSession();
         for (const item of e) {
-            await axios.delete('/api/mapcon/cidade', { data: { num_seq_cidade: item.num_seq_cidade } })
+            await axios.delete('/api/mapcon/cidade', { 
+                data: { num_seq_cidade: item.num_seq_cidade },
+                user: {
+                    id: session.user.id,
+                    perfil: session.user.perfil
+                }
+            })
         }
 
         childRef.current.updateDatatable()

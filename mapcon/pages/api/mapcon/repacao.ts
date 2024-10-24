@@ -1,12 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from 'next-auth/react';
+import { getServerSession } from "next-auth"
 import base from '../../../lib/back/base_query'
 import { LogRequest } from './_helper';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-    const session = await getSession({ req });
+    const session = await getServerSession(req, res, { /* options */ });
     if (session) {
-        LogRequest(__filename, req, session);
+        LogRequest(__filename, req, req.body);
         if (req.method == 'GET' && req.query.id) {
             res.status(200).json(await base.getModel('repertorio_acao', { 'num_seq_repertorio_acao': req.query.id }))
         } else if (req.method == 'GET') {

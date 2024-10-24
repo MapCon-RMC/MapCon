@@ -65,9 +65,16 @@ export default function RepertorioAcaoPage(props) {
         
     }
 
-    async function removeRows(e){
+    async function removeRows(e) {
+        const session = await getSession();
         for (const item of e) {
-            await axios.delete('/api/mapcon/repacao', { data: { num_seq_repertorio_acao: item.num_seq_repertorio_acao } })
+            await axios.delete('/api/mapcon/repacao', { 
+                data: { num_seq_repertorio_acao: item.num_seq_repertorio_acao },
+                user: {
+                    id: session.user.id,
+                    perfil: session.user.perfil
+                }
+            })
         }
 
         childRef.current.updateDatatable()

@@ -64,9 +64,16 @@ export default function formaparticipacaoPage(props) {
         
     }
 
-    async function removeRows(e){
+    async function removeRows(e) {
+        const session = await getSession();
         for (const item of e) {
-            await axios.delete('/api/mapcon/formaparticipacao', { data: { num_seq_forma_participacao: item.num_seq_forma_participacao } })
+            await axios.delete('/api/mapcon/formaparticipacao', { 
+                data: { num_seq_forma_participacao: item.num_seq_forma_participacao },
+                user: {
+                    id: session.user.id,
+                    perfil: session.user.perfil
+                }
+            })
         }
 
         childRef.current.updateDatatable()

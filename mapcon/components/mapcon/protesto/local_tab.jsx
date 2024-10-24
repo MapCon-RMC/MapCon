@@ -73,8 +73,14 @@ export function LocalTab({ protestId, options, selected }, props) {
             acceptLabel: 'Sim',
             rejectLabel: 'Não',
             accept: async () => {
-
-                await axios.delete('/api/mapcon/local', { data: { 'num_seq_local': e.id } })
+                const session = await getSession();
+                await axios.delete('/api/mapcon/local', { 
+                    data: { 'num_seq_local': e.id },
+                    user: {
+                        id: session.user.id,
+                        perfil: session.user.perfil
+                    }
+                })
                 const newSelectedValues = selectedValue.filter(v => v.id != e.id)
                 setselectedValue(newSelectedValues)
             },

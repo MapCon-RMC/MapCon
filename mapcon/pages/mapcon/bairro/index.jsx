@@ -69,8 +69,15 @@ export default function BairroPage(props) {
     }
 
     async function removeRows(e) {
+        const session = await getSession();
         for (const item of e) {
-            await axios.delete('/api/mapcon/bairro', { data: { num_seq_bairro: item.num_seq_bairro } })
+            await axios.delete('/api/mapcon/bairro', { 
+                data: { num_seq_bairro: item.num_seq_bairro },
+                user: {
+                    id: session.user.id,
+                    perfil: session.user.perfil
+                }
+            })
         }
 
         childRef.current.updateDatatable()
