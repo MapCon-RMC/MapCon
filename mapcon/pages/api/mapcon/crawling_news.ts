@@ -11,7 +11,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             res.status(200).json(await base.getModel('crawling.crawling_news', { 'url': req.query.id }))
         } else if (req.method == 'GET') {     
             res.status(200).json(await base.getModels('crawling.crawling_news', req.query))
-        } else if (req.method == 'PUT'){
+        } else if (req.method == 'PUT') {
             res.status(200).json(await base.updateModel('crawling.crawling_news',{ 'url': req.body.url },req.body))
         } else if (req.method == 'DELETE'){
             res.status(200).json(await base.deleteModel('crawling.crawling_news',{ 'url': req.body.url }))

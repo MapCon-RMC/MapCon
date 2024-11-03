@@ -10,69 +10,63 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     if (session) {
         LogRequest(__filename, req);
         if (req.body.is_protesto) {
-        // Marca como protesto
-        await db("crawling.crawling_news")
-            .where({ url: req.body.url })
-            .update({ tipo: true });
-
-        // Pega um nome único para o screenshot que será gerado
-        const img_name = uuidv1();
-
-        // Tira o screenshot
-        let add_screenshot = true;
-        const command = `node screenshot.js ${req.body.url} ${img_name}`;
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-            console.error(`Erro ao tirar screenshot: ${error.message}`);
-            console.log(`stdout: ${stdout}`);
-            console.error(`stderr: ${stderr}`);
-            add_screenshot = false;
-            return;
-            }
-        });
-
-        if (typeof req.body.existente == "number") {
-            // Vincula com um protesto já existente
-            // Adicionar fonte
-            await db("fonte").insert({
-            fonte_protesto_num_seq_fonte_protesto: 22,
-            protesto_num_seq_protesto: req.body.existente,
-            referencia: req.body.url,
-            });
-            // Adicionar documento
-            if (add_screenshot) {
-            await db("screenshot").insert({
-                id: img_name,
-                id_protesto: req.body.existente,
-            });
-            }
-        } else {
-            const ret = await db("protesto")
-                .insert({
-                data_protesto: req.body.data,
-                tema_protesto: req.body.titulo,
-                })
-                .returning("*");
-
-            // Adicionar fonte
-            await db("fonte").insert({
-            fonte_protesto_num_seq_fonte_protesto: 22,
-            protesto_num_seq_protesto: ret[0]["num_seq_protesto"],
-            referencia: req.body.url,
-            });
-            // Adicionar documento
-            if (add_screenshot) {
-            await db("screenshot").insert({
-                id: img_name,
-                id_protesto: ret[0]["num_seq_protesto"],
-            });
-            }
-
+            // Marca como protesto
             await db("crawling.crawling_news")
-            .where({ url: req.body.url })
-            .delete();
-        }
-        res.status(200).json({ ok: "Notícia migrada para protestos." });
+                .where({ url: req.body.url })
+                .update({ tipo: true });
+
+            // Pega um nome único para o screenshot que será gerado
+            const img_name = uuidv1();
+
+            // Tira o screenshot
+            let add_screenshot = true;
+            const command = `node screenshot.js ${req.body.url} ${img_name}`;
+            exec(command, (error, stdout, stderr) => {
+                if (error) {
+                    console.error(`Erro ao tirar screenshot: ${error.message}`);
+                    console.log(`stdout: ${stdout}`);
+                    console.error(`stderr: ${stderr}`);
+                    add_screenshot = false;
+                }
+            });
+
+            if (typeof req.body.existente == "number") { // Vincula com um protesto já existente
+                // Adicionar fonte
+                await db("fonte").insert({
+                    fonte_protesto_num_seq_fonte_protesto: 22,
+                    protesto_num_seq_protesto: req.body.existente,
+                    referencia: req.body.url,
+                });
+                // Adicionar documento
+                if (add_screenshot) {
+                    await db("screenshot").insert({
+                        id: img_name,
+                        id_protesto: req.body.existente,
+                    });
+                }
+            } else {
+                const ret = await db("protesto")
+                    .insert({
+                        data_protesto: req.body.data,
+                        tema_protesto: req.body.titulo,
+                    })
+                    .returning("*");
+
+                // Adicionar fonte
+                await db("fonte").insert({
+                    fonte_protesto_num_seq_fonte_protesto: 22,
+                    protesto_num_seq_protesto: ret[0]["num_seq_protesto"],
+                    referencia: req.body.url,
+                });
+                // Adicionar documento
+                if (add_screenshot) {
+                    await db("screenshot").insert({
+                        id: img_name,
+                        id_protesto: ret[0]["num_seq_protesto"],
+                    });
+                }
+            }
+            res.status(200).json({ ok: "Notícia migrada para protestos." });
         }
         res.status(200).json({ ok: "Alterações descartadas." });
     } else {
