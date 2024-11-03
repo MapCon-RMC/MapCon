@@ -11,18 +11,16 @@ import { RadioButton } from 'primereact/radiobutton';
 import { useForm, Controller } from 'react-hook-form';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
-import { confirmDialog, ConfirmDialog } from 'primereact/confirmdialog';
+import { ConfirmDialog } from 'primereact/confirmdialog';
 import { InputSwitch } from 'primereact/inputswitch';
-import { Tag } from 'primereact/tag';
-import { Calendar } from 'primereact/calendar';
-import { Tooltip } from 'primereact/tooltip';
 import moment from 'moment';
+import { Chip } from 'primereact/chip';
 
 export default function NoticiasRastreadasPage(props) {
   const router = useRouter();
 
-  const [showForm, setshowForm] = useState({ visible: false });
-  const [loading, setloading] = useState(true);
+  const [showForm, setShowForm] = useState({ visible: false });
+  const [loading, setLoading] = useState(true);
   const [defaultDate, setDefaultDate] = useState(new Date());
 
   // Para conseguir atualizar datatable
@@ -35,41 +33,14 @@ export default function NoticiasRastreadasPage(props) {
       if (!session) {
         router.push("/login");
       } else {
-        setloading(false);
+        setLoading(false);
       }
     };
     login();
   }, []);
 
-  async function deleteButtonClicked(e, search) {
-    confirmDialog({
-      message: e.length > 1 ? 'Tem certeza que deseja remover os dados selecionados?' : 'Tem certeza que deseja remover o dado selecionado?',
-      header: "Confirmação",
-      icon: "pi pi-exclamation-triangle pi-red",
-      accept: () => removeRows(e),
-      acceptLabel: "Sim",
-      rejectLabel: "Não",
-      // reject: () => rejectFunc()
-    });
-  }
-
-  async function removeRows(e) {
-    const session = await getSession();
-    for (const item of e) {
-      await axios.delete("/api/mapcon/crawling_news", {
-        data: { url: item.url },
-        user: {
-          id: session.user.id,
-          perfil: session.user.perfil
-        }
-      });
-    }
-
-    childRef.current.updateDatatable();
-  }
-
   function closeFormDialog(update) {
-    setshowForm(false);
+    setShowForm(false);
     if (update) {
       childRef.current.updateDatatable();
     }
@@ -87,7 +58,7 @@ export default function NoticiasRastreadasPage(props) {
       }})
     ).data;
 
-    setshowForm({
+    setShowForm({
       information: data,
       close_protests,
       visible: true,
@@ -106,23 +77,6 @@ export default function NoticiasRastreadasPage(props) {
       <div>
         <span className="p-column-title">Data</span>
         {rowData.data ? moment(rowData.data).format("DD/MM/YYYY") : ""}
-      </div>
-    );
-  };
-
-  const predictedTemplate = (rowData) => {
-    return (
-      <div>
-        <span className="p-column-title">Tipo (Predição)</span>
-        {rowData.tipo_predicted ? (
-          rowData.tipo_predicted == 0 ? (
-            <Tag className="p-mr-2" severity="success" value="Outra"></Tag>
-          ) : (
-            <Tag className="p-mr-2" severity="danger" value="Protesto"></Tag>
-          )
-        ) : (
-          <Tag className="p-mr-2" value="Não processada"></Tag>
-        )}
       </div>
     );
   };
@@ -190,18 +144,15 @@ export default function NoticiasRastreadasPage(props) {
             />
             {/*  */}
             <Column
-              field="tipo_predicted"
-              body={predictedTemplate}
-              header="Tipo (Predição)"
-              sortable={true}
-            />
-            {/*  */}
-            <Column
               field="url"
               body={openURLBodyTemplate}
               header="URL"
             />
-            <Column header="Ações" body={actionBodyTemplate}></Column>
+            {/*  */}
+            <Column 
+              header="Ações" 
+              body={actionBodyTemplate}
+            />
           </TableCrud>
         </div>
       </div>
@@ -232,6 +183,7 @@ function MigraNoticiaForm({ showForm, closeForm }) {
       existente: null,
       data: new Date(data),
       titulo: titulo,
+      termos: termos,
     },
   });
 
@@ -240,31 +192,30 @@ function MigraNoticiaForm({ showForm, closeForm }) {
     dados.url = url;
     dados.data = moment(dados.data).format("yyyy-MM-DD");
     const session = await getSession();
-    await axios
-      .post(`/api/mapcon/migra`, {
-        ...dados,
+    if (dados.is_protesto) {
+      await axios
+        .post(`/api/mapcon/migra`, {
+          ...dados,
+          user: {
+            id: session.user.id,
+            perfil: session.user.perfil
+          }
+        })
+        .then(() => setSending(false))
+        .catch(() => setSending(false));
+    } else {
+      await axios.put("/api/mapcon/crawling_news", { 
+        url: url,
+        tipo: false,
         user: {
-          id: session.user.id,
-          perfil: session.user.perfil
-        }
-      })
-      .then(() => setSending(false))
-      .catch(() => setSending(false));
+            id: session.user.id,
+            perfil: session.user.perfil
+        },
+      });
+    }
+
     closeForm(true);
   };
-
-  async function removeEl(url) {
-    const session = await getSession();
-    await axios.delete("/api/mapcon/crawling_news", {
-      data: { url: url },
-      user: {
-          id: session.user.id,
-          perfil: session.user.perfil
-      }
-    });
-
-    closeForm(true);
-  }
 
   const isProtesto = watch("is_protesto");
   const isExistenteSet = watch("existente");
@@ -277,24 +228,34 @@ function MigraNoticiaForm({ showForm, closeForm }) {
       draggable={false}
       visible={showForm.visible}
       onHide={() => closeForm(false)}
-      style={{ width: "60vw" }}
+      style={{ width: "60vw", maxWidth: "650px" }}
     >
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="p-fluid p-formgrid p-grid p-mt-lg-4 p-mt-4">
-          <div className="p-field p-col-12 p-md-2">
-            <label>Data</label>
-            <br />
-            {moment(data).format("DD/MM/YYYY")}
-          </div>
-          <div className="p-field p-col-12 p-md-8">
-            <label>Título</label>
-            <br />
+        <div className="">
+          <div className="p-field p-col-12">
+            <p>Título</p>
             <a href={url} target="blank">
               {titulo}
             </a>
           </div>
+          <div className="p-field p-col-12 p-md-2">
+            <p>Data</p>
+            {moment(data).format("DD/MM/YYYY")}
+          </div>
+          <div className="p-field p-col-12">
+            <b>Termos: </b>
+            { termos ? termos.map((termo) => (
+              <Chip label={termo} key={termo}
+                style={{
+                  backgroundColor: "rgba(255,200,60,0.6)",
+                  margin: "0.15rem",
+                }}/>
+            )) : 
+              <Chip label={"N/A"}/>
+            }
+          </div>
           <div className="p-field p-col-12 p-md-12">
-            <label htmlFor="is_protesto">É um protesto?*</label>
+            <label htmlFor="is_protesto">É um protesto? *</label>
             <br />
             <Controller
               name="is_protesto"
@@ -388,27 +349,17 @@ function MigraNoticiaForm({ showForm, closeForm }) {
             </div>
           ) : null}
           
-          <div style={{
-            position: "relative",
-            display: "inline-flex",
-            width: "100%",
-          }}>
-            <div className="p-col-12 p-md-6">
-              <Button
-                label="Remover Notícia"
-                icon="pi pi-times"
-                onClick={() => removeEl(url)}
-                className="p-button-danger"
-              />
-            </div>
-            <div className="p-col-12 p-md-6">
-              <Button
-                disabled={sending}
-                label={sending ? "Atualizando..." : "Atualizar"}
-                icon="pi pi-check"
-              />
-            </div>
-          </div>
+          <Button
+            disabled={sending}
+            label={sending ? "Atualizando..." : "Atualizar"}
+            icon="pi pi-check"
+            style={{
+              position: "relative",
+              width: "auto",
+              left: "100%",
+              transform: "translateX(-100%)",
+            }}
+          />
         </div>
       </form>
     </Dialog>
