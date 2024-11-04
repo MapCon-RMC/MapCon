@@ -15,10 +15,9 @@ function Index(props) {
 }
 
 export async function getServerSideProps(context){
-  const conflitos = await db.raw(`SELECT num_seq_protesto, tema_protesto, to_char(data_protesto,'DD/MM/YYYY') as data,latitude,longitude 
-                                  FROM protesto p INNER JOIN geolocalizacao g ON p.num_seq_protesto = g.protesto_num_seq_protesto WHERE status = 1;`);
+  const conflitos = await db.raw(`SELECT * FROM mapa_protestos;`);
   const session = await getSession({req: context.req})
-  if(!session){
+  if (!session) {
     return {
       redirect: {
         destination: '/login',
