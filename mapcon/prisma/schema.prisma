@@ -1,0 +1,390 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["views", "multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas = ["public", "crawling"]
+}
+
+model crawling_news {
+  url           String    @id @db.VarChar(500)
+  cidades       Json
+  titulo        String    @db.VarChar(500)
+  termos        String[]  @db.VarChar(50)
+  content       String?
+  data          DateTime  @db.Date
+  processada    Boolean?
+  tipo          Boolean?
+  data_insercao DateTime? @db.Date
+  
+  @@schema("crawling")
+}
+
+
+model agente {
+  num_seq_agente                                  BigInt               @id
+  forma_participacao_num_seq_forma_participacao   Int
+  participacao_agente_num_seq_participacao_agente Int?
+  protesto_num_seq_protesto                       Int?
+  participacao_agente                             participacao_agente? @relation(fields: [participacao_agente_num_seq_participacao_agente], references: [num_seq_participacao_agente], onDelete: NoAction, onUpdate: NoAction, map: "fk_6em2ejr0o8hhjxrtq4kbm4o25")
+  protesto                                        protesto?            @relation(fields: [protesto_num_seq_protesto], references: [num_seq_protesto], onDelete: NoAction, onUpdate: NoAction, map: "fk_hm1stgs0d7yi29ry1as4envq7")
+  forma_participacao                              forma_participacao   @relation(fields: [forma_participacao_num_seq_forma_participacao], references: [num_seq_forma_participacao], onDelete: NoAction, onUpdate: NoAction, map: "fk_r8twfmg6aopkyp6g1aeii8ghj")
+
+  @@schema("public")
+}
+
+model agente_protesto {
+  num_seq_agente_protesto                   Int                   @id @default(autoincrement())
+  agente_protesto                           String                @db.VarChar(100)
+  local_agente                              String?               @db.VarChar(100)
+  categoria_agente_num_seq_categoria_agente Int
+  categoria_agente                          categoria_agente      @relation(fields: [categoria_agente_num_seq_categoria_agente], references: [num_seq_categoria_agente], onDelete: NoAction, onUpdate: NoAction, map: "fk_sncxtqvw0l0s5lbqp838uxcmn")
+  participacao_agente                       participacao_agente[]
+
+  @@schema("public")
+}
+
+model bairro {
+  num_seq_bairro        Int     @id @default(autoincrement())
+  bairro                String  @db.VarChar(100)
+  cidade_num_seq_cidade Int?
+  cidade                cidade? @relation(fields: [cidade_num_seq_cidade], references: [num_seq_cidade], onDelete: NoAction, onUpdate: NoAction, map: "fk_3obh4bj7p7pxor0ecs426ak83")
+  local                 local[]
+
+  @@schema("public")
+}
+
+model categoria_agente {
+  num_seq_categoria_agente Int               @id @default(autoincrement())
+  desc_categoria_agente    String            @db.VarChar(100)
+  agente_protesto          agente_protesto[]
+
+  @@schema("public")
+}
+
+model categoria_objeto {
+  num_seq_categoria_objeto Int               @id @default(autoincrement())
+  desc_categoria_objeto    String            @db.VarChar(100)
+  objeto_protesto          objeto_protesto[]
+
+  @@schema("public")
+}
+
+model cidade {
+  num_seq_cidade Int      @id @default(autoincrement())
+  cidade         String   @db.VarChar(100)
+  bairro         bairro[]
+  local          local[]
+
+  @@schema("public")
+}
+
+model conflito {
+  num_seq_conflito    Int        @id @default(autoincrement())
+  desc_conflito       String?    @db.VarChar(100)
+  desc_detal_conflito String?
+  ident_conflito      String     @db.VarChar(100)
+  protesto            protesto[]
+
+  @@schema("public")
+}
+
+model desdobramento {
+  num_seq_desdobramento     Int       @id @default(autoincrement())
+  descritor_desdobramento   String?
+  desdobramento             String    @db.VarChar(100)
+  fonte_desdobramento       String?   @db.VarChar(100)
+  protesto_num_seq_protesto Int?
+  protesto                  protesto? @relation(fields: [protesto_num_seq_protesto], references: [num_seq_protesto], onDelete: NoAction, onUpdate: NoAction, map: "fk_f1m6ia6ed30awqdwpcn8aqwlf")
+
+  @@schema("public")
+}
+
+model documento {
+  num_seq_documento         BigInt    @id
+  caminho_documento         String?   @db.VarChar(1000)
+  mime_type                 String?   @db.VarChar(100)
+  nome_documento            String?   @db.VarChar(1000)
+  protesto_num_seq_protesto Int?
+  byte_array                Bytes?
+  protesto                  protesto? @relation(fields: [protesto_num_seq_protesto], references: [num_seq_protesto], onDelete: NoAction, onUpdate: NoAction, map: "fk_6786j9pfw77wjr2mdo34qsfwe")
+
+  @@schema("public")
+}
+
+model fonte {
+  num_seq_fonte                         Int             @id @default(autoincrement())
+  referencia                            String?
+  fonte_protesto_num_seq_fonte_protesto Int?
+  protesto_num_seq_protesto             Int?
+  protesto                              protesto?       @relation(fields: [protesto_num_seq_protesto], references: [num_seq_protesto], onDelete: Cascade, onUpdate: NoAction, map: "fk_dwjpdjbmmdhtb6jda0iv6463d")
+  fonte_protesto                        fonte_protesto? @relation(fields: [fonte_protesto_num_seq_fonte_protesto], references: [num_seq_fonte_protesto], onDelete: Cascade, onUpdate: NoAction, map: "fk_qcn6bmr0ft3w0jua43tbecqce")
+
+  @@schema("public")
+}
+
+model fonte_protesto {
+  num_seq_fonte_protesto Int     @id @default(autoincrement())
+  desc_fonte_protesto    String  @db.VarChar(100)
+  fonte                  fonte[]
+
+  @@schema("public")
+}
+
+model forma_participacao {
+  num_seq_forma_participacao Int                   @id @default(autoincrement())
+  desc_forma_participacao    String                @db.VarChar(100)
+  agente                     agente[]
+  participacao_agente        participacao_agente[]
+
+  @@schema("public")
+}
+
+model forma_protesto {
+  num_seq_forma_protesto                  Int             @id @default(autoincrement())
+  forma_protesto                          String          @db.VarChar(100)
+  protesto_num_seq_protesto               Int?
+  repertorio_acao_num_seq_repertorio_acao Int
+  repertorio_acao                         repertorio_acao @relation(fields: [repertorio_acao_num_seq_repertorio_acao], references: [num_seq_repertorio_acao], onDelete: NoAction, onUpdate: NoAction, map: "fk_50ds2joxi11c7i7ieyhln6b1a")
+  protesto                                protesto?       @relation(fields: [protesto_num_seq_protesto], references: [num_seq_protesto], onDelete: NoAction, onUpdate: NoAction, map: "fk_d0yabbeu6ovmjfo3vk7nwv1ya")
+
+  @@schema("public")
+}
+
+model geolocalizacao {
+  num_seq_geolocalizacao    Int       @id @default(autoincrement())
+  nivel_exatidao            String    @db.VarChar(100)
+  latitude                  Float
+  longitude                 Float
+  protesto_num_seq_protesto Int?
+  raio                      Int
+  protesto                  protesto? @relation(fields: [protesto_num_seq_protesto], references: [num_seq_protesto], onDelete: NoAction, onUpdate: NoAction, map: "fk_f9fgsyedymyy26tqs5qtuuiwe")
+
+  @@schema("public")
+}
+
+model grafico {
+  num_seq_grafico BigInt  @id
+  ano             Int?
+  contador        Int?
+  variavel        String? @db.VarChar(100)
+
+  @@schema("public")
+}
+
+model grafico_limite {
+  num_seq_grafico_limite BigInt @id
+  cod                    Int?
+
+  @@schema("public")
+}
+
+model local {
+  num_seq_local             Int       @id @default(autoincrement())
+  endereco                  String    @db.VarChar(100)
+  origem_manifestacao       String?   @db.VarChar(100)
+  bairro_num_seq_bairro     Int
+  cidade_num_seq_cidade     Int
+  protesto_num_seq_protesto Int?
+  protesto                  protesto? @relation(fields: [protesto_num_seq_protesto], references: [num_seq_protesto], onDelete: NoAction, onUpdate: NoAction, map: "fk_71efmcu2dreqbq3c3pio139b")
+  bairro                    bairro    @relation(fields: [bairro_num_seq_bairro], references: [num_seq_bairro], onDelete: NoAction, onUpdate: NoAction, map: "fk_co37ta4f7xcotyeep00n3mjfa")
+  cidade                    cidade    @relation(fields: [cidade_num_seq_cidade], references: [num_seq_cidade], onDelete: NoAction, onUpdate: NoAction, map: "fk_p90vsdlkv0ka0c3g0af7riefd")
+
+  @@schema("public")
+}
+
+model objeto_protesto {
+  num_seq_objeto_protesto                   Int              @id @default(autoincrement())
+  descritor_objeto_protesto                 String?
+  objeto_protesto                           String           @db.VarChar(100)
+  categoria_objeto_num_seq_categoria_objeto Int
+  protesto_num_seq_protesto                 Int?
+  protesto                                  protesto?        @relation(fields: [protesto_num_seq_protesto], references: [num_seq_protesto], onDelete: NoAction, onUpdate: NoAction, map: "fk_e6k7039w7f80by34t29sptd7x")
+  categoria_objeto                          categoria_objeto @relation(fields: [categoria_objeto_num_seq_categoria_objeto], references: [num_seq_categoria_objeto], onDelete: NoAction, onUpdate: NoAction, map: "fk_nirqosm7ka9rfbxq9fofdrd57")
+
+  @@schema("public")
+}
+
+model participacao_agente {
+  num_seq_participacao_agente                   Int                @id @default(autoincrement())
+  agente_protesto_num_seq_agente_protesto       Int
+  forma_participacao_num_seq_forma_participacao Int
+  protesto_num_seq_protesto                     Int?
+  agente                                        agente[]
+  protesto                                      protesto?          @relation(fields: [protesto_num_seq_protesto], references: [num_seq_protesto], onDelete: NoAction, onUpdate: NoAction, map: "fk_djwi7vxup7n4d3huw42mds6iu")
+  forma_participacao                            forma_participacao @relation(fields: [forma_participacao_num_seq_forma_participacao], references: [num_seq_forma_participacao], onDelete: NoAction, onUpdate: NoAction, map: "fk_m6auofs5cl51gx55l77ldk3ev")
+  agente_protesto                               agente_protesto    @relation(fields: [agente_protesto_num_seq_agente_protesto], references: [num_seq_agente_protesto], onDelete: NoAction, onUpdate: NoAction, map: "fk_morh3c97cmt0969vrqkbqgat2")
+
+  @@schema("public")
+}
+
+model perfil_participante {
+  num_seq_perfil_participante                                     BigInt          @id
+  resposta9                                                       String?         @db.VarChar(100)
+  resposta1                                                       BigInt
+  resposta10                                                      BigInt
+  resposta11                                                      BigInt
+  resposta12                                                      BigInt
+  resposta13                                                      BigInt
+  resposta14                                                      BigInt
+  resposta15                                                      BigInt
+  resposta16                                                      BigInt
+  resposta17                                                      BigInt
+  resposta18                                                      BigInt
+  resposta2                                                       BigInt
+  resposta3                                                       BigInt
+  resposta4                                                       BigInt
+  resposta5                                                       BigInt
+  resposta6                                                       BigInt
+  resposta7                                                       BigInt
+  resposta8                                                       BigInt
+  protesto_num_seq_protesto                                       Int?
+  perfil_resposta_perfil_participante_resposta13Toperfil_resposta perfil_resposta @relation("perfil_participante_resposta13Toperfil_resposta", fields: [resposta13], references: [num_seq_perfil_resposta], onDelete: NoAction, onUpdate: NoAction, map: "fk_29u693jyqfbawkuo7tymr2ruf")
+  perfil_resposta_perfil_participante_resposta14Toperfil_resposta perfil_resposta @relation("perfil_participante_resposta14Toperfil_resposta", fields: [resposta14], references: [num_seq_perfil_resposta], onDelete: NoAction, onUpdate: NoAction, map: "fk_2u381f1j4krc7hu1n86kth333")
+  perfil_resposta_perfil_participante_resposta15Toperfil_resposta perfil_resposta @relation("perfil_participante_resposta15Toperfil_resposta", fields: [resposta15], references: [num_seq_perfil_resposta], onDelete: NoAction, onUpdate: NoAction, map: "fk_5092g6qd3mh0p9pb8xha35dbv")
+  perfil_resposta_perfil_participante_resposta12Toperfil_resposta perfil_resposta @relation("perfil_participante_resposta12Toperfil_resposta", fields: [resposta12], references: [num_seq_perfil_resposta], onDelete: NoAction, onUpdate: NoAction, map: "fk_5d03mq142p5r75yuimw52wtqq")
+  perfil_resposta_perfil_participante_resposta6Toperfil_resposta  perfil_resposta @relation("perfil_participante_resposta6Toperfil_resposta", fields: [resposta6], references: [num_seq_perfil_resposta], onDelete: NoAction, onUpdate: NoAction, map: "fk_6354j8qki504mdwrtq3tbd1ug")
+  perfil_resposta_perfil_participante_resposta10Toperfil_resposta perfil_resposta @relation("perfil_participante_resposta10Toperfil_resposta", fields: [resposta10], references: [num_seq_perfil_resposta], onDelete: NoAction, onUpdate: NoAction, map: "fk_6m4cgen9akpjoxkri4x55jes7")
+  perfil_resposta_perfil_participante_resposta4Toperfil_resposta  perfil_resposta @relation("perfil_participante_resposta4Toperfil_resposta", fields: [resposta4], references: [num_seq_perfil_resposta], onDelete: NoAction, onUpdate: NoAction, map: "fk_7mgxniwi4nwkjkwiijs35hcb7")
+  perfil_resposta_perfil_participante_resposta11Toperfil_resposta perfil_resposta @relation("perfil_participante_resposta11Toperfil_resposta", fields: [resposta11], references: [num_seq_perfil_resposta], onDelete: NoAction, onUpdate: NoAction, map: "fk_864r6go46k6qighguwvd4ddu3")
+  perfil_resposta_perfil_participante_resposta3Toperfil_resposta  perfil_resposta @relation("perfil_participante_resposta3Toperfil_resposta", fields: [resposta3], references: [num_seq_perfil_resposta], onDelete: NoAction, onUpdate: NoAction, map: "fk_8lbg7ywftugtd75e256kmtnx9")
+  perfil_resposta_perfil_participante_resposta17Toperfil_resposta perfil_resposta @relation("perfil_participante_resposta17Toperfil_resposta", fields: [resposta17], references: [num_seq_perfil_resposta], onDelete: NoAction, onUpdate: NoAction, map: "fk_b86v4nfd13tp2p5qt6eubc7xo")
+  perfil_resposta_perfil_participante_resposta1Toperfil_resposta  perfil_resposta @relation("perfil_participante_resposta1Toperfil_resposta", fields: [resposta1], references: [num_seq_perfil_resposta], onDelete: NoAction, onUpdate: NoAction, map: "fk_gxpdou5x33xaae5kle5y4pdm2")
+  perfil_resposta_perfil_participante_resposta2Toperfil_resposta  perfil_resposta @relation("perfil_participante_resposta2Toperfil_resposta", fields: [resposta2], references: [num_seq_perfil_resposta], onDelete: NoAction, onUpdate: NoAction, map: "fk_hwrf3sy41r6u40hn1k0723kip")
+  protesto                                                        protesto?       @relation(fields: [protesto_num_seq_protesto], references: [num_seq_protesto], onDelete: NoAction, onUpdate: NoAction, map: "fk_i2bqsl0g48eqhhop4kjqccksl")
+  perfil_resposta_perfil_participante_resposta18Toperfil_resposta perfil_resposta @relation("perfil_participante_resposta18Toperfil_resposta", fields: [resposta18], references: [num_seq_perfil_resposta], onDelete: NoAction, onUpdate: NoAction, map: "fk_ll3c8rkvogxxe588l909fkd7h")
+  perfil_resposta_perfil_participante_resposta5Toperfil_resposta  perfil_resposta @relation("perfil_participante_resposta5Toperfil_resposta", fields: [resposta5], references: [num_seq_perfil_resposta], onDelete: NoAction, onUpdate: NoAction, map: "fk_m3345hgxosjftpsujhidq5ym4")
+  perfil_resposta_perfil_participante_resposta8Toperfil_resposta  perfil_resposta @relation("perfil_participante_resposta8Toperfil_resposta", fields: [resposta8], references: [num_seq_perfil_resposta], onDelete: NoAction, onUpdate: NoAction, map: "fk_n659gb6uknbxsyj196kvy1l1y")
+  perfil_resposta_perfil_participante_resposta7Toperfil_resposta  perfil_resposta @relation("perfil_participante_resposta7Toperfil_resposta", fields: [resposta7], references: [num_seq_perfil_resposta], onDelete: NoAction, onUpdate: NoAction, map: "fk_r710f8fmcreft5myloyvbfy35")
+  perfil_resposta_perfil_participante_resposta16Toperfil_resposta perfil_resposta @relation("perfil_participante_resposta16Toperfil_resposta", fields: [resposta16], references: [num_seq_perfil_resposta], onDelete: NoAction, onUpdate: NoAction, map: "fk_svpfe6daqiosnpjev9288hx6")
+
+  @@schema("public")
+}
+
+model perfil_resposta {
+  num_seq_perfil_resposta                                             BigInt                @id
+  desc_perfil_resposta                                                String?               @db.VarChar(100)
+  perfil_participante_perfil_participante_resposta13Toperfil_resposta perfil_participante[] @relation("perfil_participante_resposta13Toperfil_resposta")
+  perfil_participante_perfil_participante_resposta14Toperfil_resposta perfil_participante[] @relation("perfil_participante_resposta14Toperfil_resposta")
+  perfil_participante_perfil_participante_resposta15Toperfil_resposta perfil_participante[] @relation("perfil_participante_resposta15Toperfil_resposta")
+  perfil_participante_perfil_participante_resposta12Toperfil_resposta perfil_participante[] @relation("perfil_participante_resposta12Toperfil_resposta")
+  perfil_participante_perfil_participante_resposta6Toperfil_resposta  perfil_participante[] @relation("perfil_participante_resposta6Toperfil_resposta")
+  perfil_participante_perfil_participante_resposta10Toperfil_resposta perfil_participante[] @relation("perfil_participante_resposta10Toperfil_resposta")
+  perfil_participante_perfil_participante_resposta4Toperfil_resposta  perfil_participante[] @relation("perfil_participante_resposta4Toperfil_resposta")
+  perfil_participante_perfil_participante_resposta11Toperfil_resposta perfil_participante[] @relation("perfil_participante_resposta11Toperfil_resposta")
+  perfil_participante_perfil_participante_resposta3Toperfil_resposta  perfil_participante[] @relation("perfil_participante_resposta3Toperfil_resposta")
+  perfil_participante_perfil_participante_resposta17Toperfil_resposta perfil_participante[] @relation("perfil_participante_resposta17Toperfil_resposta")
+  perfil_participante_perfil_participante_resposta1Toperfil_resposta  perfil_participante[] @relation("perfil_participante_resposta1Toperfil_resposta")
+  perfil_participante_perfil_participante_resposta2Toperfil_resposta  perfil_participante[] @relation("perfil_participante_resposta2Toperfil_resposta")
+  perfil_participante_perfil_participante_resposta18Toperfil_resposta perfil_participante[] @relation("perfil_participante_resposta18Toperfil_resposta")
+  perfil_participante_perfil_participante_resposta5Toperfil_resposta  perfil_participante[] @relation("perfil_participante_resposta5Toperfil_resposta")
+  perfil_participante_perfil_participante_resposta8Toperfil_resposta  perfil_participante[] @relation("perfil_participante_resposta8Toperfil_resposta")
+  perfil_participante_perfil_participante_resposta7Toperfil_resposta  perfil_participante[] @relation("perfil_participante_resposta7Toperfil_resposta")
+  perfil_participante_perfil_participante_resposta16Toperfil_resposta perfil_participante[] @relation("perfil_participante_resposta16Toperfil_resposta")
+
+  @@schema("public")
+}
+
+model perfil_usuario {
+  num_seq_perfil_usuario BigInt    @id
+  desc_perfil_usuario    String    @db.VarChar(100)
+  usuario                usuario[]
+
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model protesto {
+  num_seq_protesto          Int                   @id @default(autoincrement())
+  data_protesto             DateTime              @db.Timestamp(6)
+  desc_detal_protesto       String?
+  desc_protesto             String?               @db.VarChar(100)
+  ident_protesto            String?               @db.VarChar(100)
+  qtde_envolvidos_protesto  Int?
+  tema_protesto             String                @db.VarChar(400)
+  conflito_num_seq_conflito Int?
+  usuario_num_seq_usuario   Int?
+  status                    Int                   @default(0) @db.SmallInt
+  agente                    agente[]
+  desdobramento             desdobramento[]
+  documento                 documento[]
+  fonte                     fonte[]
+  forma_protesto            forma_protesto[]
+  geolocalizacao            geolocalizacao[]
+  local                     local[]
+  objeto_protesto           objeto_protesto[]
+  participacao_agente       participacao_agente[]
+  perfil_participante       perfil_participante[]
+  usuario                   usuario?              @relation(fields: [usuario_num_seq_usuario], references: [num_seq_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_4qqlt8gw1lo3hwrepga2tajtk")
+  conflito                  conflito?             @relation(fields: [conflito_num_seq_conflito], references: [num_seq_conflito], onDelete: NoAction, onUpdate: NoAction, map: "fk_o5qfdumcje5tolpbms8apmjn")
+
+  @@schema("public")
+}
+
+model relatorio_geral {
+  num_seq_relatorio_geral   BigInt    @id
+  agente_protesto           String?   @db.VarChar(100)
+  bairro                    String?   @db.VarChar(100)
+  cidade                    String?   @db.VarChar(100)
+  data_protesto             DateTime? @db.Timestamp(6)
+  desc_categoria_objeto     String?   @db.VarChar(100)
+  desc_detal_protesto       String?
+  desc_fonte_protesto       String?   @db.VarChar(100)
+  desc_forma_participacao   String?   @db.VarChar(100)
+  desc_protesto             String?   @db.VarChar(100)
+  desc_repertorio_acao      String?   @db.VarChar(100)
+  descritor_desdobramento   String?
+  descritor_objeto_protesto String?
+  desdobramento             String?   @db.VarChar(100)
+  endereco                  String?   @db.VarChar(100)
+  fonte_desdobramento       String?   @db.VarChar(100)
+  forma_protesto            String?   @db.VarChar(100)
+  num_seq_protesto          BigInt?
+  objeto_protesto           String?   @db.VarChar(100)
+  origem_manifestacao       String?   @db.VarChar(100)
+  qtde_envolvidos_protesto  Int?
+  referencia                String?
+  tema_protesto             String?   @db.VarChar(100)
+  verifica                  Int?
+  latitude                  Float?
+  longitude                 Float?
+
+  @@schema("public")
+}
+
+model relatorio_geral_contador {
+  num_seq_relatorio_geral_contador BigInt  @id
+  cont                             Int?
+  num_seq_protesto                 BigInt?
+
+  @@schema("public")
+}
+
+model repertorio_acao {
+  num_seq_repertorio_acao Int              @id @default(autoincrement())
+  desc_repertorio_acao    String           @db.VarChar(100)
+  forma_protesto          forma_protesto[]
+
+  @@schema("public")
+}
+
+model screenshot {
+  id          String @id @db.VarChar(200)
+  id_protesto Int
+
+  @@schema("public")
+}
+
+model usuario {
+  num_seq_usuario                       Int             @id @default(autoincrement())
+  usu_login                             String          @unique(map: "uk_8fjuatstg8t2v75ltdydhh1ki") @db.VarChar(50)
+  usu_senha                             String          @db.VarChar(200)
+  perfil_usuario_num_seq_perfil_usuario BigInt?
+  protesto                              protesto[]
+  perfil_usuario                        perfil_usuario? @relation(fields: [perfil_usuario_num_seq_perfil_usuario], references: [num_seq_perfil_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_taqxc6xa8buti1t6r49yo7gw5")
+
+  @@schema("public")
+}
