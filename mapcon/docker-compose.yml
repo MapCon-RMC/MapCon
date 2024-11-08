@@ -1,11 +1,9 @@
 services:
   postgres:
     image: postgres:16-alpine
+    env_file:
+      - .env
     container_name: postgres
-    environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
     ports:
       - 5433:5432
       
@@ -14,8 +12,6 @@ services:
     working_dir: /app
     volumes:
       - .:/app
-    environment:
-      DATABASE_URL: "postgresql://postgres:admin@postgres:5432/postgres"
     depends_on:
       - postgres
     entrypoint: ["sh", "-c", "npx prisma migrate dev --name init"]
