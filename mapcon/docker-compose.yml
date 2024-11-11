@@ -14,4 +14,4 @@ services:
       - .:/app
     depends_on:
       - postgres
-    entrypoint: ["sh", "-c", "npx prisma migrate dev --name init"]
+    entrypoint: ["sh", "-c", "npx prisma migrate dev --name init && npx prisma db seed"]
