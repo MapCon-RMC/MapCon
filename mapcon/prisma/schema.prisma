@@ -23,6 +23,16 @@ model crawling_news {
   @@schema("crawling")
 }
 
+// View de mapa de protestos usa a seguinte query SQL:
+//    CREATE VIEW mapa_protestos AS
+//    SELECT num_seq_protesto, tema_protesto, to_char(data_protesto,'DD/MM/YYYY') as data,latitude,longitude 
+//    FROM protesto p 
+//    INNER JOIN geolocalizacao g 
+//    ON p.num_seq_protesto = g.protesto_num_seq_protesto 
+//    WHERE status = 1
+//    WITH DATA;
+
+// CREATE MATERIALIZED VIEW "public"."mapa_protestos" AS SELECT num_seq_protesto, tema_protesto, to_char(data_protesto,'DD/MM/YYYY') as "data", latitude, longitude FROM protesto p  INNER JOIN geolocalizacao g ON p.num_seq_protesto = g.protesto_num_seq_protesto  WHERE status = 1 WITH DATA;
 
 model agente {
   num_seq_agente                                  BigInt               @id

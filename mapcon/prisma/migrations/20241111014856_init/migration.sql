@@ -1,14 +1,5 @@
-/*
-  Warnings:
-
-  - You are about to drop the `crawling_news` table. If the table is not empty, all the data it contains will be lost.
-
-*/
 -- CreateSchema
 CREATE SCHEMA IF NOT EXISTS "crawling";
-
--- DropTable
-DROP TABLE "public"."crawling_news";
 
 -- CreateTable
 CREATE TABLE "crawling"."crawling_news" (
@@ -460,3 +451,6 @@ ALTER TABLE "public"."protesto" ADD CONSTRAINT "fk_o5qfdumcje5tolpbms8apmjn" FOR
 
 -- AddForeignKey
 ALTER TABLE "public"."usuario" ADD CONSTRAINT "fk_taqxc6xa8buti1t6r49yo7gw5" FOREIGN KEY ("perfil_usuario_num_seq_perfil_usuario") REFERENCES "public"."perfil_usuario"("num_seq_perfil_usuario") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- Create mapa_protestos VIEW
+CREATE MATERIALIZED VIEW "public"."mapa_protestos" AS SELECT num_seq_protesto, tema_protesto, to_char(data_protesto,'DD/MM/YYYY') as "data", latitude, longitude FROM protesto p  INNER JOIN geolocalizacao g ON p.num_seq_protesto = g.protesto_num_seq_protesto  WHERE status = 1 WITH DATA;
