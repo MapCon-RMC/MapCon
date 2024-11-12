@@ -5,11 +5,20 @@ async function main() {
     // INSERT INTO crawling.crawling_news (url, cidades, titulo, data) VALUES ('noticiateste.com', '[{\"uf\":\"Teste\", \"municipio\":\"Teste\", \"populacao\":0}]', 'Noticia Teste', '2000-01-01');
     await prisma.crawling_news.create({
         data: {
-            url: 'noticiateste.com',
+            url: 'http://localhost:3000',
             cidades: '[{"uf":"UF Teste", "municipio":"Municipio Teste", "populacao":0}]',
             titulo: 'Noticia Teste',
             data: new Date("2000-01-01"),
             termos: ['Termo Teste']
+        }
+    });
+    
+    await prisma.crawling_news.create({
+        data: {
+            url: 'http://localhost:3000',
+            cidades: '[{"uf":"UF Teste", "municipio":"Municipio Teste", "populacao":0}]',
+            titulo: 'Noticia Teste 2',
+            data: new Date()
         }
     });
 
