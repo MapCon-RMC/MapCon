@@ -1,4 +1,4 @@
-// import { getCsrfToken } from 'next-auth/react'
+import { getCsrfToken } from 'next-auth/react'
 // import { useState } from 'react';
 import { signIn } from "next-auth/react";
 import { useState } from 'react';
@@ -62,22 +62,7 @@ export default function SignIn({ csrfToken }) {
 
 
 SignIn.getInitialProps = async (context) => {
-  const url = `https://conflitoscuritiba.blog.br/api/auth/csrf`;
-  // const url = `http://localhost:3000/api/auth/csrf`;
-  
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'text/html',
-      'Connection': 'keep-alive',
-      'Upgrade-Insecure-Requests': '1',
-    },
-  });
-  const data = await response.json();
-  // console.log('URL: ', url);
-  // console.log('Response: ', response);
-  // console.log('Data: ', data);
   return {
-    csrfToken: data.csrfToken || ''
-  };
+    csrfToken: await getCsrfToken(context)
+  }
 }

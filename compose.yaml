@@ -30,10 +30,11 @@ services:
         PROJECT: ${COMPOSE_PROJECT_NAME}
         NODE_VERSION: ${NODE_VERSION}
     ports:
-      - "8080:8080"
+      - "8080:3000"
     env_file:
       - path: env/${COMPOSE_PROJECT_NAME}.env
         required: true
     depends_on:
       postgres:
         condition: service_healthy
+    command: ["/bin/bash", "./entrypoint.sh"]

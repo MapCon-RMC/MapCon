@@ -4,8 +4,16 @@ ARG NODE_VERSION=latest
 # Usa a imagem leve do Node.js
 FROM node:${NODE_VERSION}
 
+WORKDIR /app
+
+# Copia os arquivos de configuração do npm
+COPY mapcon/package*.json ./
+
+# Instala as dependências do projeto
+RUN npm install
+
 # Copia os arquivos essenciais primeiro
 COPY mapcon /app
 
-# definir o ponto de entrada do contêiner
-#ENTRYPOINT [ "" ]
+RUN chmod +x entrypoint.sh
+
