@@ -7,23 +7,36 @@ if ! command -v npx &> /dev/null; then
   exit 1
 fi
 
-# Run prisma migrate status and capture the output
-status_output=$(npx prisma migrate status)
-
-# Check if the database schema is up to date
-if echo "$status_output" | grep -q "Database schema is up to date"; then
-  echo "Database schema is up to date. Running the app..."
-  npm run dev
-else
-  echo "Database schema is not up to date. Running prisma migrate dev..."
+# Check if on Development or Production context and run the appropriate Prisma migration command
+if [ "$1" = "development" ]; then
+  echo "Running prisma migrate dev..."
   npx prisma migrate dev
-  if [ $? -eq 0 ]; then
-    echo "Prisma migrate dev completed successfully. Running the app..."
-    npm run dev
-  else
-    echo "Error: prisma migrate dev failed. Please check the output above."
-    exit 1
-  fi
+elif [ "$1" = "production" ]; then
+  echo "Running prisma migrate deploy..."
+  npx prisma migrate deploy
+else
+  echo "Error: Invalid context. Use 'development' or 'production'."
+  exit 1
+fi
+  
+# Check if the migration was successful
+if [ $? -eq 0 ]; then
+  echo "Prisma migrate completed successfully. Running the app..."
+else
+  echo "Error: prisma migrate failed. Please check the output above."
+  exit 1
+fi
+
+# Run the application
+if [ "$1" = "development" ]; then
+  echo "Running in development mode..."
+  npm run dev
+elif [ "$1" = "production" ]; then
+  echo "Running in production mode..."
+  npm run start
+else
+  echo "Error: Invalid context. Use 'development' or 'production'."
+  exit 1
 fi
 
 exit 0

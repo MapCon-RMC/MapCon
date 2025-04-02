@@ -37,4 +37,5 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: ["/bin/bash", "./entrypoint.sh"]
+    command: ["/bin/bash", "./entrypoint.sh", "production"]
+    # command: ["/bin/sh", "-c", "while true; do sleep 1; done"]

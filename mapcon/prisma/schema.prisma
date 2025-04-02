@@ -306,6 +306,17 @@ model perfil_usuario {
   @@schema("public")
 }
 
+// Tabela de Equipe
+model equipe {
+  num_seq_equipe Int     @id @default(autoincrement())
+  nome           String  @db.VarChar(255)
+  funcao         String  @db.VarChar(255)
+  email          String  @db.VarChar(255)
+  perfil         String  @db.VarChar(255)
+
+  @@schema("public")
+}
+
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model protesto {
   num_seq_protesto          Int                   @id @default(autoincrement())
