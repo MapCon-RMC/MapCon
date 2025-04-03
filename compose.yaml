@@ -1,8 +1,8 @@
 name: mapcon-ct
 
 services:
-  postgres:
-    container_name: postgresql
+  deaau-mapcon-postgresql:
+    container_name: deaau-mapcon-postgresql
     image: postgres:16.6
     environment:
       POSTGRES_DB: mapcon
@@ -17,8 +17,7 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - "~/docker/volumes/keycloak/postgresql:/var/lib/postgresql"
-      - "~/docker/volumes/keycloak/postgresql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d"
+      - deaau-mapcon-postgresql:/var/lib/postgresql"
 
   mapcon:
     container_name: deaau-mapcon
@@ -35,7 +34,10 @@ services:
       - path: env/${COMPOSE_PROJECT_NAME}.env
         required: true
     depends_on:
-      postgres:
+      deaau-mapcon-postgresql:
         condition: service_healthy
     command: ["/bin/bash", "./entrypoint.sh", "production"]
     # command: ["/bin/sh", "-c", "while true; do sleep 1; done"]
+
+volumes:
+  deaau-mapcon-postgresql:
