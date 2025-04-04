@@ -1,0 +1,42 @@
+name: mapcon-ct
+
+services:
+  deaau-mapcon-postgresql:
+    container_name: deaau-mapcon-postgresql
+    image: postgres:16.6
+    environment:
+      POSTGRES_DB: mapcon
+      POSTGRES_USER: mapcon
+      POSTGRES_PASSWORD: mapcon
+    ports:
+      - "5432:5432"
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - deaau-mapcon-postgresql:/var/lib/postgresql"
+
+  mapcon:
+    container_name: deaau-mapcon
+    image: "${COMPOSE_PROJECT_NAME}:node-${NODE_VERSION}"
+    build:
+      context: .
+      args:
+        PLATFORM: ${PLATFORM}
+        PROJECT: ${COMPOSE_PROJECT_NAME}
+        NODE_VERSION: ${NODE_VERSION}
+    ports:
+      - "8080:3000"
+    env_file:
+      - path: env/${COMPOSE_PROJECT_NAME}.env
+        required: true
+    depends_on:
+      deaau-mapcon-postgresql:
+        condition: service_healthy
+    command: ["/bin/bash", "./entrypoint.sh", "production"]
+
+volumes:
+  deaau-mapcon-postgresql:

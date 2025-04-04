@@ -1,4 +1,4 @@
-// import { getCsrfToken } from 'next-auth/react'
+import { getCsrfToken } from 'next-auth/react'
 // import { useState } from 'react';
 import { signIn } from "next-auth/react";
 import { useState } from 'react';
@@ -61,9 +61,9 @@ export default function SignIn({ csrfToken }) {
 }
 
 
-SignIn.getInitialProps = async (context) => {
-  const url = `https://conflitoscuritiba.blog.br/api/auth/csrf`;
-  // const url = `http://localhost:3000/api/auth/csrf`;
+SignIn.getInitialProps = async () => {
+  console.log(process.env.NEXTAUTH_URL);
+  const url = `${process.env.NEXTAUTH_URL}/api/auth/csrf`;
   
   const response = await fetch(url, {
     method: 'GET',
@@ -74,9 +74,7 @@ SignIn.getInitialProps = async (context) => {
     },
   });
   const data = await response.json();
-  // console.log('URL: ', url);
-  // console.log('Response: ', response);
-  // console.log('Data: ', data);
+  
   return {
     csrfToken: data.csrfToken || ''
   };

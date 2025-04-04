@@ -6,7 +6,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas = ["public", "crawling"]
+  schemas  = ["public", "crawling"]
 }
 
 model crawling_news {
@@ -302,6 +302,17 @@ model perfil_usuario {
   num_seq_perfil_usuario BigInt    @id
   desc_perfil_usuario    String    @db.VarChar(100)
   usuario                usuario[]
+
+  @@schema("public")
+}
+
+// Tabela de Equipe
+model equipe {
+  num_seq_equipe Int     @id @default(autoincrement())
+  nome           String  @db.VarChar(255)
+  funcao         String  @db.VarChar(255)
+  email          String  @db.VarChar(255)
+  perfil         String  @db.VarChar(255)
 
   @@schema("public")
 }
