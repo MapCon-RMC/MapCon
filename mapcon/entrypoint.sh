@@ -10,7 +10,7 @@ fi
 # Check if on Development or Production context and run the appropriate Prisma migration command
 if [ "$1" = "development" ]; then
   echo "Running prisma migrate dev..."
-  npx prisma migrate dev
+  npx prisma migrate dev --name init --create-only
 elif [ "$1" = "production" ]; then
   echo "Running prisma migrate deploy..."
   npx prisma migrate deploy

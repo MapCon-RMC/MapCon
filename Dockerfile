@@ -15,5 +15,7 @@ RUN npm install
 # Copia os arquivos essenciais primeiro
 COPY mapcon /app
 
+RUN npm run build
+
 RUN chmod +x entrypoint.sh
 

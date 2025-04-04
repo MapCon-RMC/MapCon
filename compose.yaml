@@ -37,7 +37,6 @@ services:
       deaau-mapcon-postgresql:
         condition: service_healthy
     command: ["/bin/bash", "./entrypoint.sh", "production"]
-    # command: ["/bin/sh", "-c", "while true; do sleep 1; done"]
 
 volumes:
   deaau-mapcon-postgresql:
