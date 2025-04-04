@@ -61,8 +61,21 @@ export default function SignIn({ csrfToken }) {
 }
 
 
-SignIn.getInitialProps = async (context) => {
+SignIn.getInitialProps = async () => {
+  console.log(process.env.NEXTAUTH_URL);
+  const url = `${process.env.NEXTAUTH_URL}/api/auth/csrf`;
+  
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'text/html',
+      'Connection': 'keep-alive',
+      'Upgrade-Insecure-Requests': '1',
+    },
+  });
+  const data = await response.json();
+  
   return {
-    csrfToken: await getCsrfToken(context)
-  }
+    csrfToken: data.csrfToken || ''
+  };
 }
