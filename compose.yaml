@@ -17,17 +17,19 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - deaau-mapcon-postgresql:/var/lib/postgresql"
+      - deaau-mapcon-postgresql:/var/lib/postgresql
 
   mapcon:
     container_name: deaau-mapcon
-    image: "${COMPOSE_PROJECT_NAME}:node-${NODE_VERSION}"
+    image: "deaau-ct/${COMPOSE_PROJECT_NAME}:node-${NODE_VERSION}"
     build:
       context: .
       args:
         PLATFORM: ${PLATFORM}
         PROJECT: ${COMPOSE_PROJECT_NAME}
         NODE_VERSION: ${NODE_VERSION}
+      platforms:
+        - ${PLATFORM}
     ports:
       - "8080:3000"
     env_file:
@@ -36,7 +38,6 @@ services:
     depends_on:
       deaau-mapcon-postgresql:
         condition: service_healthy
-    command: ["/bin/bash", "./entrypoint.sh", "production"]
 
 volumes:
   deaau-mapcon-postgresql:

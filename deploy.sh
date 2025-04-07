@@ -20,7 +20,7 @@ fi
 source .env
 source ${PROJECT_ENV}
 
-export ECR_REPO=${ECR_REPO_BASE}
+export ECR_REPO=${ECR_REPO_BASE}/${PROJECT}
 ECR_REPO_URI=${ECR_URI}/${ECR_REPO}
 TAGS="node-${NODE_VERSION} latest"
 
