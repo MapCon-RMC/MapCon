@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+# No Secrets Manager não é possível processar substituição de variáveis.
+# Para maior flexibilidade, construímos o valor desta variável aqui.
+export DATABASE_URL=postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=${DB_SCHEMA}
+
 # Check if Prisma CLI is installed
 if ! command -v npx &> /dev/null; then
   echo "Error: npx command not found. Make sure Node.js and npm are installed."

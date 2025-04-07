@@ -1,0 +1,91 @@
+{
+    "family": "deaau-mapcon",
+    "containerDefinitions": [
+        {
+            "name": "deaau-mapcon",
+            "image": "279634266618.dkr.ecr.sa-east-1.amazonaws.com/deaau-ct/mapcon:latest",
+            "cpu": 256,
+            "memory": 256,
+            "memoryReservation": 128,
+            "portMappings": [
+                {
+                    "name": "deaau-mapcon-3000-tcp",
+                    "containerPort": 3000,
+                    "hostPort": 0,
+                    "protocol": "tcp",
+                    "appProtocol": "http"
+                }
+            ],
+            "essential": true,
+            "environment": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "secrets": [
+                {
+                    "name": "DB_HOST",
+                    "valueFrom": "arn:aws:secretsmanager:sa-east-1:279634266618:secret:deaau-ct/mapcon-KXRuYC:db_host::"
+                },
+                {
+                    "name": "DB_PORT",
+                    "valueFrom": "arn:aws:secretsmanager:sa-east-1:279634266618:secret:deaau-ct/mapcon-KXRuYC:db_port::"
+                },
+                {
+                    "name": "DB_NAME",
+                    "valueFrom": "arn:aws:secretsmanager:sa-east-1:279634266618:secret:deaau-ct/mapcon-KXRuYC:db_name::"
+                },
+                {
+                    "name": "DB_SCHEMA",
+                    "valueFrom": "arn:aws:secretsmanager:sa-east-1:279634266618:secret:deaau-ct/mapcon-KXRuYC:db_schema::"
+                },
+                {
+                    "name": "DB_USER",
+                    "valueFrom": "arn:aws:secretsmanager:sa-east-1:279634266618:secret:deaau-ct/mapcon-KXRuYC:db_user::"
+                },
+                {
+                    "name": "DB_PASS",
+                    "valueFrom": "arn:aws:secretsmanager:sa-east-1:279634266618:secret:deaau-ct/mapcon-KXRuYC:db_pass::"
+                },
+                {
+                    "name": "NEXT_AUTH_SECRET",
+                    "valueFrom": "arn:aws:secretsmanager:sa-east-1:279634266618:secret:deaau-ct/mapcon-KXRuYC:next_auth_secret::"
+                },
+                {
+                    "name": "NEXT_AUTH_URL",
+                    "valueFrom": "arn:aws:secretsmanager:sa-east-1:279634266618:secret:deaau-ct/mapcon-KXRuYC:next_auth_url::"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-create-group": "true",
+                    "awslogs-group": "/utfpr/ecs/deaau-mapcon",
+                    "awslogs-region": "sa-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                },
+                "secretOptions": []
+            },
+            "systemControls": []
+        }
+    ],
+    "taskRoleArn": "arn:aws:iam::279634266618:role/ecsTaskExecutionRole",
+    "executionRoleArn": "arn:aws:iam::279634266618:role/ecsTaskExecutionRole",
+    "networkMode": "bridge",
+    "volumes": [],
+    "requiresCompatibilities": [
+        "EC2"
+    ],
+    "runtimePlatform": {
+        "cpuArchitecture": "ARM64",
+        "operatingSystemFamily": "LINUX"
+    },
+    "tags": [
+        {
+            "key": "utfpr-depto",
+            "value": "DEAAU-CT"
+        },
+        {
+            "key": "utfpr-usuario",
+            "value": "simonep"
+        }
+    ]
+}
