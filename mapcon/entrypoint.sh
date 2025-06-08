@@ -1,58 +1,58 @@
 #!/bin/bash
 set -e
 
-# Construção da DATABASE_URL com base nas variáveis de ambiente
+# No Secrets Manager não é possível processar substituição de variáveis.
+# Para maior flexibilidade, construímos o valor desta variável aqui.
 export DATABASE_URL=postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=${DB_SCHEMA}
 
-# Verifica se o Prisma CLI está disponível via npx
+# Check if Prisma CLI is installed
 if ! command -v npx &> /dev/null; then
-  echo "❌ Erro: 'npx' não encontrado. Certifique-se de que Node.js e npm estão instalados."
+  echo "Error: npx command not found. Make sure Node.js and npm are installed."
   exit 1
 fi
 
-# Função para rodar o app
+# Run the application
 run_app() {
   if [ "$1" = "development" ]; then
-    echo "▶️ Rodando em modo desenvolvimento..."
+    echo "Running in development mode..."
     npm run dev
   elif [ "$1" = "production" ]; then
-    echo "▶️ Rodando em modo produção..."
+    echo "Running in production mode..."
     npm run start
   fi
 }
 
-# Execução conforme o ambiente
+# Check if on Development or Production context and run the appropriate Prisma migration command
 if [ "$1" = "development" ]; then
-  echo "🚧 Rodando 'prisma migrate dev'..."
+  echo "Running prisma migrate dev..."
   npx prisma migrate dev --name init --create-only
-  echo "✅ Migração de desenvolvimento concluída com sucesso."
+  echo "Prisma migrate dev completed successfully. Running the app..."
   run_app development
 
 elif [ "$1" = "production" ]; then
-  echo "🚀 Rodando 'prisma migrate deploy'..."
+  echo "Running prisma migrate deploy..."
   if ! npx prisma migrate deploy; then
-    echo "⚠️ Falha na migração. Tentando aplicar 'migrate resolve'..."
+    echo "Migration failed. Attempting to resolve..."
 
-    # Obtém o nome da primeira migração encontrada
     MIGRATION_NAME=$(ls prisma/migrations | head -n 1)
 
     if [ -z "$MIGRATION_NAME" ]; then
-      echo "❌ Nenhuma migração encontrada para resolver. Abortando."
+      echo "Error: No migration found to resolve. Aborting."
       exit 1
     fi
 
-    echo "✅ Marcando migração '$MIGRATION_NAME' como aplicada..."
+    echo "Resolving migration '$MIGRATION_NAME' as applied..."
     npx prisma migrate resolve --applied "$MIGRATION_NAME"
 
-    echo "🔁 Tentando novamente 'prisma migrate deploy'..."
+    echo "Re-running prisma migrate deploy..."
     npx prisma migrate deploy
   fi
 
-  echo "✅ Migração de produção concluída com sucesso."
+  echo "Prisma migrate deploy completed successfully. Running the app..."
   run_app production
 
 else
-  echo "❌ Erro: contexto inválido. Use 'development' ou 'production'."
+  echo "Error: Invalid context. Use 'development' or 'production'."
   exit 1
 fi
 
