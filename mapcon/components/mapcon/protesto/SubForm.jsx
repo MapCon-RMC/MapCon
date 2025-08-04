@@ -1,14 +1,16 @@
-import { useEffect } from 'react';
-import { useFormContext } from './FormProvider';
+import { useEffect } from 'react';                // Importa hook para efeitos colaterais
+import { useFormContext } from './FormProvider';  // Importa hook customizado para acessar contexto de formulário global
 
 function SubForm({ onSubmit, children }) {
+  // Extrai a função registerForm do contexto do formulário global
   const { registerForm } = useFormContext();
 
-  // Register this subform's submit action with the global context
+  // Quando o componente monta, registra sua função onSubmit no contexto global para que o formulário pai possa controlar os envios
   useEffect(() => {
     registerForm(onSubmit);
   }, [registerForm]);
 
+  // Renderiza um formulário que executa onSubmit ao ser enviado e exibe os filhos passados para este componente
   return (
     <form onSubmit={onSubmit}>
       {children}
@@ -16,4 +18,4 @@ function SubForm({ onSubmit, children }) {
   );
 }
 
-export default SubForm;
+export default SubForm;  // Exporta o componente para ser usado em outros arquivos
