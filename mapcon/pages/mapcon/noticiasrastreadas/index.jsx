@@ -1,44 +1,49 @@
+// Importa os hooks e componentes necessários do React e bibliotecas auxiliares
 import React, { useEffect, useRef, useState } from 'react';
-import TableCrud from '../../../lib/front/cruddatatable/datatable';
-import { Column } from 'primereact/column';
-import { useRouter } from 'next/router';
-import axios from 'axios';
-import ToolbarMapCon from '../../../components/toolbar_mapcon';
-import Loading from '../../../components/loading/loading';
-import { getSession } from 'next-auth/react';
-import { Dialog } from 'primereact/dialog';
-import { RadioButton } from 'primereact/radiobutton';
-import { useForm, Controller } from 'react-hook-form';
-import { Button } from 'primereact/button';
-import { InputText } from 'primereact/inputtext';
-import { ConfirmDialog } from 'primereact/confirmdialog';
-import { InputSwitch } from 'primereact/inputswitch';
-import moment from 'moment';
-import { Chip } from 'primereact/chip';
+import TableCrud from '../../../lib/front/cruddatatable/datatable'; // Componente de datatable customizado
+import { Column } from 'primereact/column'; // Coluna da tabela PrimeReact
+import { useRouter } from 'next/router'; // Hook de navegação
+import axios from 'axios'; // Cliente HTTP
+import ToolbarMapCon from '../../../components/toolbar_mapcon'; // Componente de toolbar
+import Loading from '../../../components/loading/loading'; // Componente de loading
+import { getSession } from 'next-auth/react'; // Função para obter sessão do next-auth
+import { Dialog } from 'primereact/dialog'; // Modal
+import { RadioButton } from 'primereact/radiobutton'; // Botões de opção
+import { useForm, Controller } from 'react-hook-form'; // Biblioteca de formulários
+import { Button } from 'primereact/button'; // Botão estilizado
+import { InputText } from 'primereact/inputtext'; // Campo de texto
+import { ConfirmDialog } from 'primereact/confirmdialog'; // Diálogo de confirmação
+import { InputSwitch } from 'primereact/inputswitch'; // Interruptor
+import moment from 'moment'; // Biblioteca de datas
+import { Chip } from 'primereact/chip'; // Chip para tags
 
+// Componente principal da página
 export default function NoticiasRastreadasPage(props) {
   const router = useRouter();
 
+  // Estado que controla visibilidade do formulário de migração
   const [showForm, setShowForm] = useState({ visible: false });
   const [loading, setLoading] = useState(true);
   const [defaultDate, setDefaultDate] = useState(new Date());
 
-  // Para conseguir atualizar datatable
+  // Referência ao componente filho (datatable) para forçar atualização
   const childRef = useRef();
 
+  // Executado ao carregar a página
   useEffect(() => {
     setDefaultDate(new Date());
     const login = async () => {
       const session = await getSession();
       if (!session) {
-        router.push("/login");
+        router.push("/login"); // Redireciona se não estiver logado
       } else {
-        setLoading(false);
+        setLoading(false); // Remove tela de loading
       }
     };
     login();
   }, []);
 
+  // Fecha o formulário e atualiza a tabela se necessário
   function closeFormDialog(update) {
     setShowForm(false);
     if (update) {
@@ -46,18 +51,24 @@ export default function NoticiasRastreadasPage(props) {
     }
   }
 
+  // Função chamada ao clicar em "Editar" uma notícia
   async function processNews(data) {
     const formated_date = moment(data.data).format("YYYY-MM-DD");
     const session = await getSession();
+
+    // Consulta protestos próximos para possível vinculação
     const close_protests = await (
-      await axios.get(`/api/mapcon/get_protestos_proximos?data=${formated_date}`, { params: {
-            user: {
-                id: session.user.id,
-                perfil: session.user.perfil
-            }
-      }})
+      await axios.get(`/api/mapcon/get_protestos_proximos?data=${formated_date}`, {
+        params: {
+          user: {
+            id: session.user.id,
+            perfil: session.user.perfil
+          }
+        }
+      })
     ).data;
 
+    // Abre formulário com os dados da notícia e protestos próximos
     setShowForm({
       information: data,
       close_protests,
@@ -65,13 +76,14 @@ export default function NoticiasRastreadasPage(props) {
     });
   }
 
-  // Filtros
+  // Filtros disponíveis na tabela
   const filters = [
     { label: "Título", value: "titulo", types: ["contain", "equal"] },
     { label: "URL", value: "url", types: ["contain", "equal"] },
     { label: "Data", value: "data", types: ["a partir de", "antes de"] },
   ];
 
+  // Formata a data exibida na tabela
   const dataBodyTemplate = (rowData) => {
     return (
       <div>
@@ -81,6 +93,7 @@ export default function NoticiasRastreadasPage(props) {
     );
   };
 
+  // Botão de ação "Editar" na tabela
   function actionBodyTemplate(rowData) {
     return (
       <React.Fragment>
@@ -93,7 +106,8 @@ export default function NoticiasRastreadasPage(props) {
       </React.Fragment>
     );
   }
-  
+
+  // Botão de link para abrir URL da notícia
   function openURLBodyTemplate(rowData) {   
     return (
       <React.Fragment>
@@ -111,6 +125,7 @@ export default function NoticiasRastreadasPage(props) {
     );
   }
 
+  // Exibe tela de loading enquanto carrega ou componente com datatable
   return loading ? (
     <Loading></Loading>
   ) : (
@@ -124,31 +139,28 @@ export default function NoticiasRastreadasPage(props) {
             {...props}
             title="Notícias Rastreadas"
             filters={filters}
-            // onAddButtonClicked={addButtonClicked}
-            // onEditButtonClicked={editButtonClicked}
-            // onDeleteButtonClicked={deleteButtonClicked}
             url="/api/mapcon/crawling_news"
           > 
-            {/*  */}
+            {/* Coluna de data formatada */}
             <Column 
               field="data"
               body={dataBodyTemplate}
               header="Data"
               sortable={true}
             />
-            {/*  */}
+            {/* Coluna de título */}
             <Column 
               field="titulo" 
               header="Título" 
               sortable={true} 
             />
-            {/*  */}
+            {/* Coluna de botão/link para URL */}
             <Column
               field="url"
               body={openURLBodyTemplate}
               header="URL"
             />
-            {/*  */}
+            {/* Coluna com botão de ação */}
             <Column 
               header="Ações" 
               body={actionBodyTemplate}
@@ -156,6 +168,7 @@ export default function NoticiasRastreadasPage(props) {
           </TableCrud>
         </div>
       </div>
+      {/* Exibe formulário apenas se ativado */}
       {showForm.visible ? (
         <MigraNoticiaForm
           showForm={showForm}
@@ -172,11 +185,11 @@ export default function NoticiasRastreadasPage(props) {
 */
 function MigraNoticiaForm({ showForm, closeForm }) {
   const { visible, information, close_protests } = showForm;
-
   const { url, cidades, content, data, termos, tipo, tipo_predicted, titulo } = information;
 
   const [sending, setSending] = useState(false);
 
+  // Hook do formulário com valores padrão
   const { control, watch, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
       is_protesto: false,
@@ -187,11 +200,15 @@ function MigraNoticiaForm({ showForm, closeForm }) {
     },
   });
 
+  // Submissão do formulário
   const onSubmit = async (dados) => {
     setSending(true);
     dados.url = url;
     dados.data = moment(dados.data).format("yyyy-MM-DD");
+
     const session = await getSession();
+
+    // Se for protesto, migra para endpoint de protestos
     if (dados.is_protesto) {
       await axios
         .post(`/api/mapcon/migra`, {
@@ -204,6 +221,7 @@ function MigraNoticiaForm({ showForm, closeForm }) {
         .then(() => setSending(false))
         .catch(() => setSending(false));
     } else {
+      // Se não for protesto, atualiza como notícia comum
       await axios.put("/api/mapcon/crawling_news", { 
         url: url,
         tipo: false,
@@ -254,6 +272,7 @@ function MigraNoticiaForm({ showForm, closeForm }) {
               <Chip label={"N/A"}/>
             }
           </div>
+          {/* Campo "É um protesto?" */}
           <div className="p-field p-col-12 p-md-12">
             <label htmlFor="is_protesto">É um protesto? *</label>
             <br />
@@ -268,13 +287,13 @@ function MigraNoticiaForm({ showForm, closeForm }) {
               )}
             />
           </div>
+          {/* Se for protesto, mostra lista para vincular a existente ou novo */}
           {isProtesto ? (
             <div className="p-field p-col-12 p-md-12">
               <label htmlFor="data">
                 Vincular a um protesto já cadastrado*
               </label>
               <br />
-
               <Controller
                 name="existente"
                 rules={{ required: true }}
@@ -295,7 +314,6 @@ function MigraNoticiaForm({ showForm, closeForm }) {
                         </label>
                       </div>
                     ))}
-
                     <div className="p-field-radiobutton">
                       <RadioButton
                         inputId="existente"
@@ -311,25 +329,7 @@ function MigraNoticiaForm({ showForm, closeForm }) {
               />
             </div>
           ) : null}
-          {/* {isProtesto && isExistenteSet === "novo" ? (
-            <div className="p-field p-col-12 p-md-6">
-              <label htmlFor="data">Data*</label>
-              <Controller
-                name="data"
-                rules={{ required: true }}
-                control={control}
-                render={({field: { onChange, value }}) => (
-                  <Calendar
-                    value={value}
-                    onChange={(e) => onChange(e.value)}
-                    dateFormat="dd/mm/yy"
-                    mask="99/99/9999"
-                    showIcon
-                  />
-                )}
-              />
-            </div>
-          ) : null} */}
+          {/* Se for novo protesto, permite editar o título (tema) */}
           {isProtesto && isExistenteSet === "novo" ? (
             <div className="p-field p-col-12 p-md-12">
               <label htmlFor="titulo">Tema*</label>
