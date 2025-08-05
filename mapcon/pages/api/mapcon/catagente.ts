@@ -1,24 +1,68 @@
+// Tipagem para as requisições e respostas da API do Next.js
 import type { NextApiRequest, NextApiResponse } from 'next';
+
+// Importa função para obter a sessão do usuário logado com next-auth
 import { getServerSession } from "next-auth"
+
+// Importa funções de acesso genérico ao banco de dados (CRUD)
 import base from '../../../lib/back/base_query'
+
+// Importa função auxiliar para log detalhado da requisição recebida
 import { LogRequest } from './_helper';
 
+// Exporta a função padrão que trata as requisições da rota de categoria_agente
 export default async (req: NextApiRequest, res: NextApiResponse) => {
+
+    // Obtém a sessão atual do usuário (verifica se está autenticado)
     const session = await getServerSession(req, res, { /* options */ });
+
+    // Se o usuário estiver autenticado, executa o código principal
     if (session) {
+
+        // Exibe detalhes da requisição no console para fins de auditoria
         LogRequest(__filename, req);
+
+        // Se for uma requisição GET com parâmetro "id", busca uma categoria específica
         if (req.method == 'GET' && req.query.id) {
-            res.status(200).json(await base.getModel('categoria_agente', { 'num_seq_categoria_agente': req.query.id }))
+            res.status(200).json(await base.getModel(
+                'categoria_agente',                            // Nome da tabela
+                { 'num_seq_categoria_agente': req.query.id }   // Filtro pelo ID
+            ))
+
+        // Se for uma requisição GET sem "id", lista todas as categorias
         } else if (req.method == 'GET') {
-            res.status(200).json(await base.getModels('categoria_agente', req.query))
+            res.status(200).json(await base.getModels(
+                'categoria_agente',  // Nome da tabela
+                req.query            // Filtros (ex: paginação, ordenação, busca)
+            ))
+
+        // Se for uma requisição POST, insere uma nova categoria no banco
         } else if (req.method == 'POST') {
-            res.status(200).json(await base.addModel('categoria_agente', req.body))
-        } else if (req.method == 'PUT'){
-            res.status(200).json(await base.updateModel('categoria_agente',{ 'num_seq_categoria_agente': req.body.num_seq_categoria_agente },req.body))
-        } else if (req.method == 'DELETE'){
-            res.status(200).json(await base.deleteModel('categoria_agente',{ 'num_seq_categoria_agente': req.body.num_seq_categoria_agente }))
+            res.status(200).json(await base.addModel(
+                'categoria_agente',  // Nome da tabela
+                req.body             // Dados enviados no corpo da requisição
+            ))
+
+        // Se for uma requisição PUT, atualiza uma categoria existente
+        } else if (req.method == 'PUT') {
+            res.status(200).json(await base.updateModel(
+                'categoria_agente',                                           // Nome da tabela
+                { 'num_seq_categoria_agente': req.body.num_seq_categoria_agente }, // Filtro pelo ID
+                req.body                                                      // Novos dados
+            ))
+
+        // Se for uma requisição DELETE, remove uma categoria específica
+        } else if (req.method == 'DELETE') {
+            res.status(200).json(await base.deleteModel(
+                'categoria_agente',                                           // Nome da tabela
+                { 'num_seq_categoria_agente': req.body.num_seq_categoria_agente } // Filtro pelo ID
+            ))
         }
+
+    // Se o usuário **não** estiver autenticado, bloqueia o acesso com status 401
     } else {
-        res.status(401).json({ "Acesso Negado": "Você não possui permissão para acessar esses dados." })
+        res.status(401).json({
+            "Acesso Negado": "Você não possui permissão para acessar esses dados."
+        })
     }
 }
